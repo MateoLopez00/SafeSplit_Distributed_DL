@@ -1,0 +1,10 @@
+cd "c:\Users\mtgra\Desktop\Masters\SP26\Distributed Deep Learning\Project\impl"
+
+# Use simple_cnn for much faster CPU runs
+python main.py --dataset CIFAR10 --arch simple_cnn --defense safesplit_trust --backdoor pixel --num_rounds 2 --num_clients 4 --device cpu
+
+# Or the full batch runner (use cuda for speed)
+python run_experiments.py --device cuda
+
+
+The --arch simple_cnn flag will dramatically speed up CPU tests since simple_cnn has ~100x fewer parameters than ResNet-18.
