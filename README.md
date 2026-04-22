@@ -22,6 +22,8 @@ Preset meanings:
 - `medium`: interactive notebook run
 - `paper`: closest midterm reproduction setting
 
+The notebook is the main way to run the project, but the same experiment engine can also be called from `.py` entrypoints when needed.
+
 ## At A Glance
 ### Reproduced Pipeline
 This is the most useful proposal-style diagram to add here. It matches the implemented midterm reproduction flow and is a simplified version of the proposal's overall workflow view.
@@ -46,11 +48,10 @@ This is the quickest file-level view of the project:
 ```text
 SafeSplit_Distributed_DL/
 ├─ SafeSplit_walkthrough.ipynb   # main notebook: explanation + experiments + results
-├─ main.py                       # shared single-run experiment entrypoint
-├─ run_experiments.py            # batch runner for the case matrix
+├─ main.py                       # shared experiment backend used by notebook and CLI
+├─ run_experiments.py            # optional batch runner for the case matrix
 ├─ config.py                     # shared presets and experiment settings
 ├─ evaluate.py                   # MA / BA evaluation helpers
-├─ summarize_results.py          # summarize saved JSON results
 ├─ data/
 │  ├─ dataset.py                 # CIFAR-10 loading and client partitioning
 │  └─ backdoor.py                # semantic and pixel backdoor generation
@@ -76,6 +77,13 @@ Then open `SafeSplit_walkthrough.ipynb` and run it with:
 - `NOTEBOOK_EXPERIMENT_PRESET = "paper"` for the main reported results
 
 Set `NOTEBOOK_SAVE_JSON = True` if you also want the notebook runs saved into `results/`.
+
+If you prefer Python entrypoints instead of the notebook, you can still run:
+
+```bash
+python main.py --preset paper --defense safesplit --backdoor semantic
+python run_experiments.py --preset paper
+```
 
 ## Main Results
 The most important outputs come from the notebook cell under `## Midterm Comparison Suites`.
@@ -132,13 +140,9 @@ The earlier single-run demo cell is only a walkthrough sanity check and is not t
 The notebook is the recommended interface, but the same runner can also be used from the CLI:
 
 ```bash
+python main.py --preset lite --defense safesplit --backdoor semantic
+python main.py --preset paper --defense none --backdoor pixel
 python run_experiments.py --preset lite
 python run_experiments.py --preset medium
 python run_experiments.py --preset paper
-```
-
-To summarize JSON outputs in `results/`:
-
-```bash
-python summarize_results.py
 ```
