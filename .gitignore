@@ -1,0 +1,4 @@
+data_cache/
+results/*.json
+__pycache__/
+*.pyc

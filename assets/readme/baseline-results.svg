@@ -1,0 +1,17 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='1500' height='208'>
+<rect width='100%' height='100%' fill='white'/>
+<text x='20' y='30' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>Reduced baseline panel (paper preset)
+</text>
+<text x='20' y='54' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>label                      | preset | arch     | defense   | backdoor | iid_rate | rounds | clients | malicious | final_MA | final_BA | results_path
+</text>
+<text x='20' y='78' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>---------------------------+--------+----------+-----------+----------+----------+--------+---------+-----------+----------+----------+-------------
+</text>
+<text x='20' y='102' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>baseline-iid-0.6-none      | paper  | resnet18 | none      | semantic | 0.6      | 5      | 10      | 2         | 43.34    | 100.0    | None        
+</text>
+<text x='20' y='126' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>baseline-iid-0.6-dp        | paper  | resnet18 | dp        | semantic | 0.6      | 5      | 10      | 2         | 11.33    | 100.0    | None        
+</text>
+<text x='20' y='150' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>baseline-iid-0.6-krum      | paper  | resnet18 | krum      | semantic | 0.6      | 5      | 10      | 2         | 31.85    | 0.0      | None        
+</text>
+<text x='20' y='174' font-family='Consolas, Courier New, monospace' font-size='18' fill='#111827' xml:space='preserve'>baseline-iid-0.6-safesplit | paper  | resnet18 | safesplit | semantic | 0.6      | 5      | 10      | 2         | 36.5     | 0.0      | None        
+</text>
+</svg>
