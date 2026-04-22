@@ -1,32 +1,24 @@
 # SafeSplit Midterm Reproduction
 
-Concise, notebook-first reproduction of **SafeSplit: A Novel Defense Against Client-Side Backdoor Attacks in Split Learning** for the distributed deep learning midterm.
+This repository reproduces the midterm scope of **SafeSplit: A Novel Defense Against Client-Side Backdoor Attacks in Split Learning** (NDSS 2025) for a distributed deep learning course project. The implementation covers U-shaped split learning (`head → backbone → tail`), CIFAR-10 partitioning with controlled non-IID splits, client-side semantic and pixel backdoors, the SafeSplit defense (DCT and rotational scores with rollback), and reduced baselines (`none`, `safesplit`, `dp`, `krum`).
 
-This project implements:
-- U-shaped split learning with `head -> backbone -> tail`
-- CIFAR-10 client partitioning with non-IID control
-- client-side semantic and pixel backdoor attacks
-- the SafeSplit defense with DCT scoring, rotational scoring, and rollback
-- reduced baselines: `none`, `safesplit`, `dp`, and `krum`
+## Notebook workflow
 
-## Quick Walkthrough
-The main file is `SafeSplit_walkthrough.ipynb`.
+`SafeSplit_walkthrough.ipynb` is the primary interface. The notebook explains the pipeline, then runs experiments under `## Run Real Experiments In The Notebook` via `NOTEBOOK_EXPERIMENT_PRESET`, and produces the main comparisons under `## Midterm Comparison Suites`.
 
-Use it in this order:
-1. Read the first half for the step-by-step explanation of split learning, poisoning, SafeSplit scores, and rollback.
-2. Go to `## Run Real Experiments In The Notebook` and set `NOTEBOOK_EXPERIMENT_PRESET`.
-3. Run the `## Midterm Comparison Suites` cell to generate the main paper-style results directly in the notebook.
+Presets:
 
-Preset meanings:
-- `lite`: fastest sanity check
-- `medium`: interactive notebook run
-- `paper`: closest midterm reproduction setting
+| Preset   | Role                                      |
+| -------- | ----------------------------------------- |
+| `lite`   | Short runs for sanity checks              |
+| `medium` | Interactive full notebook experiments     |
+| `paper`  | Settings closest to the reported midterm  |
 
-The notebook is the main way to run the project, but the same experiment engine can also be called from `.py` entrypoints when needed.
+The same experiment logic lives in Python modules and can be invoked from `main.py` or `run_experiments.py` when batch or script execution is preferred.
 
-## At A Glance
-### Reproduced Pipeline
-This is the most useful proposal-style diagram to add here. It matches the implemented midterm reproduction flow and is a simplified version of the proposal's overall workflow view.
+## Pipeline overview
+
+The diagram summarizes the implemented flow: clients hold local CIFAR-10 data; activations pass through head, server backbone, and tail; updates are analyzed against a SafeSplit checkpoint history; benign updates are accepted and suspicious ones trigger rollback to the last accepted backbone state. A trust score extension from the original proposal is not implemented and is omitted from this diagram.
 
 ```mermaid
 flowchart LR
@@ -40,104 +32,79 @@ flowchart LR
     G -->|No| I[Rollback to latest benign checkpoint]
 ```
 
-Note: the proposal also included a trust-score extension. That extension is not part of the current reported reproduction results, so it is intentionally omitted from this README pipeline.
-
-### Small Project Map
-This is the quickest file-level view of the project:
+## Repository layout
 
 ```text
 SafeSplit_Distributed_DL/
-├─ SafeSplit_walkthrough.ipynb   # main notebook: explanation + experiments + results
-├─ main.py                       # shared experiment backend used by notebook and CLI
-├─ run_experiments.py            # optional batch runner for the case matrix
-├─ config.py                     # shared presets and experiment settings
-├─ evaluate.py                   # MA / BA evaluation helpers
+├─ SafeSplit_walkthrough.ipynb   # narrative, experiments, figures
+├─ main.py                       # shared experiment runner (notebook + CLI)
+├─ run_experiments.py            # optional matrix of CLI runs
+├─ config.py                     # presets and experiment parameters
+├─ evaluate.py                   # main task and backdoor accuracy
 ├─ data/
-│  ├─ dataset.py                 # CIFAR-10 loading and client partitioning
-│  └─ backdoor.py                # semantic and pixel backdoor generation
+│  ├─ dataset.py                 # CIFAR-10 loading and client splits
+│  └─ backdoor.py                # semantic and pixel triggers
 ├─ models/
 │  └─ split_models.py            # split model definitions
 ├─ training/
-│  └─ trainer.py                 # split-learning training loop
+│  └─ trainer.py                 # split learning training loop
 ├─ defense/
-│  ├─ safesplit.py               # SafeSplit scoring + rollback logic
-│  └─ baselines.py               # reduced DP / KRUM-style baselines
-├─ results/                      # saved JSON experiment outputs
-└─ assets/readme/                # screenshots/plots used in this README
+│  ├─ safesplit.py               # SafeSplit scoring and rollback
+│  └─ baselines.py               # DP and distance based aggregation baselines
+├─ results/                      # optional JSON outputs (gitignored)
+└─ assets/readme/                # tables and plots embedded below
 ```
 
-## How To Run
+## Execution
+
 ```bash
 pip install -r requirements.txt
 ```
 
-Then open `SafeSplit_walkthrough.ipynb` and run it with:
-- `NOTEBOOK_EXPERIMENT_PRESET = "lite"` for quick feedback
-- `NOTEBOOK_EXPERIMENT_PRESET = "medium"` for notebook-friendly experiments
-- `NOTEBOOK_EXPERIMENT_PRESET = "paper"` for the main reported results
+After installing dependencies, runs proceed in `SafeSplit_walkthrough.ipynb` by choosing `NOTEBOOK_EXPERIMENT_PRESET` among `lite`, `medium`, and `paper`, then executing the comparison suite cells. `NOTEBOOK_SAVE_JSON = True` persists JSON logs under `results/`.
 
-Set `NOTEBOOK_SAVE_JSON = True` if you also want the notebook runs saved into `results/`.
-
-If you prefer Python entrypoints instead of the notebook, you can still run:
+Equivalent CLI examples:
 
 ```bash
 python main.py --preset paper --defense safesplit --backdoor semantic
 python run_experiments.py --preset paper
 ```
 
-## Main Results
-The most important outputs come from the notebook cell under `## Midterm Comparison Suites`.
+## Results summary
 
-### 1. Table II Subset
-This is the clearest defense check: without defense, both attacks achieve near-perfect backdoor success; with SafeSplit, backdoor accuracy drops sharply while clean accuracy stays usable.
+Figures and tables below were exported from the notebook suite (`## Midterm Comparison Suites`) under the `paper` preset unless noted otherwise in the project assets.
+
+### Defense comparison (Table II correspondence)
+
+Without defense, semantic and pixel attacks reach near perfect backdoor accuracy (`BA`). SafeSplit drives `BA` down while keeping main task accuracy (`MA`) in a usable range.
 
 ![Table II results](assets/readme/table-ii-results.svg)
 
 ![Table II chart](assets/readme/table-ii-chart.png)
 
-Brief read:
-- `semantic + none`: `BA = 100.0`
-- `semantic + safesplit`: `BA = 0.0`
-- `pixel + none`: `BA = 99.99`
-- `pixel + safesplit`: `BA = 6.62`
+Representative values from the embedded run: `semantic + none` gives `BA = 100.0`; `semantic + safesplit` gives `BA = 0.0`; `pixel + none` gives `BA ≈ 99.99`; `pixel + safesplit` gives `BA = 6.62`.
 
-This is the main qualitative paper result reproduced in our notebook.
+### IID sweep (Table III correspondence)
 
-### 2. Table III Subset
-This is the IID-rate sweep. As data becomes more IID, clean accuracy improves, while SafeSplit keeps suppressing the semantic backdoor across all tested IID settings.
+Increasing the IID fraction improves `MA` for both defended and undefended runs. SafeSplit maintains `BA = 0.0` on the semantic attack across IID rates `0.6`, `0.8`, and `1.0`, while `none` remains at `BA = 100.0`.
 
 ![Table III results](assets/readme/table-iii-results.svg)
 
 ![Table III chart](assets/readme/table-iii-chart.png)
 
-Brief read:
-- `none` keeps `BA = 100.0` at `iid_rate = 0.6`, `0.8`, and `1.0`
-- `safesplit` keeps `BA = 0.0` at all three IID rates
-- clean MA rises with IID for both, which is the expected trend
+### Baseline panel
 
-### 3. Reduced Baseline Panel
-This is the compact baseline comparison. It shows that `dp` hurts clean performance without stopping the attack, while `krum` and `safesplit` both reduce BA, with SafeSplit giving the better MA/BA tradeoff here.
+The reduced baseline panel compares `none`, simplified DP, a baseline modeled on KRUM, and SafeSplit. DP lowers `MA` without removing the backdoor in this setup; KRUM and SafeSplit both reach `BA = 0.0`, with SafeSplit offering the stronger `MA` tradeoff in the reported run (`none`: `MA = 43.34`, `BA = 100.0`; `dp`: `MA = 11.33`, `BA = 100.0`; `krum`: `MA = 31.85`, `BA = 0.0`; `safesplit`: `MA = 36.5`, `BA = 0.0`).
 
 ![Baseline results](assets/readme/baseline-results.svg)
 
 ![Baseline chart](assets/readme/baseline-chart.png)
 
-Brief read:
-- `none`: `MA = 43.34`, `BA = 100.0`
-- `dp`: `MA = 11.33`, `BA = 100.0`
-- `krum`: `MA = 31.85`, `BA = 0.0`
-- `safesplit`: `MA = 36.5`, `BA = 0.0`
+## Mapping to paper tables
 
-## What To Compare To The Paper
-From the notebook:
-- `TABLE_II_CASES` corresponds to the project’s `Table II` comparison subset
-- `TABLE_III_CASES` corresponds to the project’s `Table III` comparison subset
-- `BASELINE_CASES` is the reduced baseline/figure-style comparison panel
+In the notebook, `TABLE_II_CASES` aligns with the paper’s Table II comparison, `TABLE_III_CASES` with the IID sweep reported as Table III, and `BASELINE_CASES` with the reduced baseline figure panel. Earlier demonstration cells illustrate mechanics only and are excluded from those tabular comparisons.
 
-The earlier single-run demo cell is only a walkthrough sanity check and is not the result cell used for paper comparison.
-
-## Optional CLI Runs
-The notebook is the recommended interface, but the same runner can also be used from the CLI:
+## CLI reference
 
 ```bash
 python main.py --preset lite --defense safesplit --backdoor semantic
