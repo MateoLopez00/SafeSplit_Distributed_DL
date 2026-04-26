@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import cast
 
+from config import PresetType
 from main import build_experiment_request, run_experiment
 
 
@@ -74,19 +76,20 @@ def cli_args_to_overrides(args: list[str]) -> dict[str, object]:
             overrides["seed"] = int(args[idx + 1])
             idx += 2
         elif key == "--preset":
-            overrides["preset"] = args[idx + 1]
+            preset_str = args[idx + 1]
+            overrides["preset"] = PresetType(preset_str)
             idx += 2
         elif key == "--fast-dev-run":
-            overrides["preset"] = "lite"
+            overrides["preset"] = PresetType.LITE
             idx += 1
         else:
             raise ValueError(f"Unsupported experiment argument: {key}")
     return overrides
 
 
-def run_one(args: list[str], preset: str | None = None) -> dict[str, object]:
+def run_one(args: list[str], preset: PresetType | None = None) -> dict[str, object]:
     overrides = cli_args_to_overrides(args)
-    effective_preset = overrides.pop("preset", preset)
+    effective_preset = cast(PresetType | None, overrides.pop("preset", preset))
     request = build_experiment_request(preset=effective_preset, **overrides)
     return run_experiment(request)
 
@@ -95,7 +98,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run the SafeSplit midterm experiment matrix.")
     parser.add_argument("--out", default="results/experiment_index.json")
     parser.add_argument("--fast-dev-run", action="store_true")
-    parser.add_argument("--preset", choices=["lite", "medium", "paper"], default=None)
+    parser.add_argument("--preset", choices=[p.value for p in PresetType], default=None)
     args = parser.parse_args()
 
     experiment_sets = {

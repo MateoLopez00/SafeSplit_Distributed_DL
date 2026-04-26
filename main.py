@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import DataLoader
 
 import config as cfg
+from config import PresetType
 from data import PixelTriggerAttack, PoisonedDataset, SemanticTriggerAttack, build_client_subsets, load_datasets, partition_data
 from defense import DifferentialPrivacyDefense, KrumStyleDefense, SafeSplitDefense
 from evaluate import evaluate_backdoor, evaluate_model
@@ -20,15 +21,15 @@ from training import SplitLearningTrainer
 
 @dataclass(slots=True)
 class ExperimentRequest:
-    preset: str = cfg.DEFAULT_PRESET
-    arch: str = cfg.ARCH
-    num_rounds: int = cfg.NUM_ROUNDS
-    num_clients: int = cfg.NUM_CLIENTS
-    num_malicious: int = cfg.NUM_MALICIOUS
-    iid_rate: float = cfg.IID_RATE
+    preset: PresetType = cfg.DEFAULT_PRESET
+    arch: str = "resnet18"
+    num_rounds: int = 5
+    num_clients: int = 10
+    num_malicious: int = 2
+    iid_rate: float = 0.8
     defense: str = "safesplit"
     backdoor: str = cfg.BACKDOOR_TYPE
-    pdr: float = cfg.POISONED_DATA_RATE
+    poisoned_data_rate: float = cfg.POISONED_DATA_RATE
     device: str | None = None
     seed: int = cfg.SEED
     max_samples_per_client: int | None = None
@@ -43,36 +44,42 @@ def experiment_request_to_dict(request: ExperimentRequest) -> dict[str, object]:
     return asdict(request)
 
 
-def build_experiment_request(preset: str | None = None, **overrides) -> ExperimentRequest:
-    preset_values = cfg.resolve_preset(preset)
-    request_data = {
-        "preset": str(preset_values["name"]),
-        "arch": str(preset_values["arch"]),
-        "num_rounds": int(preset_values["num_rounds"]),
-        "num_clients": int(preset_values["num_clients"]),
-        "num_malicious": int(preset_values["num_malicious"]),
-        "iid_rate": float(preset_values["iid_rate"]),
+def build_experiment_request(preset: PresetType | None = None, **overrides) -> ExperimentRequest:
+    preset_enum = preset if preset is not None else cfg.DEFAULT_PRESET
+    preset_values = cfg.resolve_preset(preset_enum)
+    
+    # Start with preset values, then apply overrides
+    kwargs = {
+        "preset": preset_enum,
+        "arch": str(preset_values["arch"]),  # type: ignore
+        "num_rounds": int(preset_values["num_rounds"]),  # type: ignore
+        "num_clients": int(preset_values["num_clients"]),  # type: ignore
+        "num_malicious": int(preset_values["num_malicious"]),  # type: ignore
+        "iid_rate": float(preset_values["iid_rate"]),  # type: ignore
         "defense": "safesplit",
         "backdoor": cfg.BACKDOOR_TYPE,
-        "pdr": cfg.POISONED_DATA_RATE,
+        "poisoned_data_rate": cfg.POISONED_DATA_RATE,
         "device": None,
         "seed": cfg.SEED,
         "max_samples_per_client": preset_values["max_samples_per_client"],
         "out_dir": str(cfg.RESULTS_DIR),
         "write_json": True,
-        "local_epochs": int(preset_values["local_epochs"]),
-        "batch_size": int(preset_values["batch_size"]),
-        "eval_batch_size": int(preset_values["eval_batch_size"]),
+        "local_epochs": int(preset_values["local_epochs"]),  # type: ignore
+        "batch_size": int(preset_values["batch_size"]),  # type: ignore
+        "eval_batch_size": int(preset_values["eval_batch_size"]),  # type: ignore
     }
+    
+    # Apply overrides
     for key, value in overrides.items():
         if value is not None:
-            request_data[key] = value
-    return ExperimentRequest(**request_data)
+            kwargs[key] = value
+    
+    return ExperimentRequest(**kwargs)  # type: ignore[arg-type]
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="SafeSplit midterm-scope reproduction")
-    parser.add_argument("--preset", choices=sorted(cfg.EXPERIMENT_PRESETS), default=None)
+    parser.add_argument("--preset", choices=[p.value for p in cfg.PresetType], default=None)
     parser.add_argument("--arch", default=None, choices=["resnet18", "simple_cnn"])
     parser.add_argument("--num-rounds", type=int, default=None)
     parser.add_argument("--num-clients", type=int, default=None)
@@ -130,9 +137,14 @@ def build_defense(name: str, num_clients: int):
 
 
 def build_experiment_request_from_args(args: argparse.Namespace) -> ExperimentRequest:
-    preset = "lite" if args.fast_dev_run else args.preset
+    if args.fast_dev_run:
+        preset_enum = PresetType.LITE
+    elif args.preset:
+        preset_enum = PresetType(args.preset)
+    else:
+        preset_enum = None
     return build_experiment_request(
-        preset=preset,
+        preset=preset_enum,
         arch=args.arch,
         num_rounds=args.num_rounds,
         num_clients=args.num_clients,
@@ -185,7 +197,7 @@ def run_experiment(request: ExperimentRequest) -> dict[str, object]:
     for client_id, subset in enumerate(client_subsets):
         dataset = subset
         if client_id in malicious_ids and attack is not None:
-            dataset = PoisonedDataset(subset, attack, request.pdr, seed=request.seed + client_id)
+            dataset = PoisonedDataset(subset, attack, request.poisoned_data_rate, seed=request.seed + client_id)
         client_loaders.append(DataLoader(dataset, batch_size=request.batch_size, shuffle=True, num_workers=0))
 
     test_loader = DataLoader(test_dataset, batch_size=request.eval_batch_size, shuffle=False, num_workers=0)

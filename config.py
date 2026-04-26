@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 
 
@@ -7,21 +8,23 @@ RESULTS_DIR = BASE_DIR / "results"
 
 # Reproduction scope
 DATASET = "CIFAR10"
-ARCH = "resnet18"
 NUM_CLASSES = 10
+SEED = 42
 
-# Split learning setup
-NUM_CLIENTS = 10
-NUM_MALICIOUS = 2
-NUM_ROUNDS = 5
+
+class PresetType(Enum):
+    """Experiment preset configurations."""
+    LITE = "lite"
+    MEDIUM = "medium"
+    PAPER = "paper"
+
+# Split learning setup (defaults, overridden by presets)
 LOCAL_EPOCHS = 1
 BATCH_SIZE = 128
 EVAL_BATCH_SIZE = 256
 LR = 1e-3
 WEIGHT_DECAY = 5e-4
 MOMENTUM = 0.9
-SEED = 42
-IID_RATE = 0.8
 
 # Attack setup
 BACKDOOR_TYPE = "semantic"
@@ -33,7 +36,7 @@ TRIGGER_SIZE = 4
 TRIGGER_POS = "bottom-right"
 
 # SafeSplit setup
-SAFE_SPLIT_WINDOW = NUM_CLIENTS
+# SAFE_SPLIT_WINDOW = NUM_CLIENTS
 DCT_LOW_FREQ_FRAC = 0.25
 ROTATION_MATRIX_WIDTH = 128
 EPS = 1e-8
@@ -43,80 +46,72 @@ DP_CLIP_NORM = 1.0
 DP_NOISE_SCALE = 1e-3
 
 # Shared experiment presets
-DEFAULT_PRESET = "paper"
-PRESET_ALIASES = {
-    "fast-dev": "lite",
-}
+DEFAULT_PRESET = PresetType.PAPER
 EXPERIMENT_PRESETS = {
-    "lite": {
+    PresetType.LITE: {
         "arch": "simple_cnn",
         "num_clients": 4,
         "num_malicious": 1,
         "num_rounds": 1,
-        "iid_rate": IID_RATE,
+        "iid_rate": 0.8,
         "max_samples_per_client": 256,
         "local_epochs": 1,
         "batch_size": 64,
         "eval_batch_size": 128,
     },
-    "medium": {
+    PresetType.MEDIUM: {
         "arch": "resnet18",
         "num_clients": 6,
         "num_malicious": 1,
         "num_rounds": 2,
-        "iid_rate": IID_RATE,
+        "iid_rate": 0.8,
         "max_samples_per_client": 1024,
         "local_epochs": 1,
         "batch_size": 96,
         "eval_batch_size": 128,
     },
-    "paper": {
-        "arch": ARCH,
-        "num_clients": NUM_CLIENTS,
-        "num_malicious": NUM_MALICIOUS,
-        "num_rounds": NUM_ROUNDS,
-        "iid_rate": IID_RATE,
+    PresetType.PAPER: {
+        "arch": "resnet18",
+        "num_clients": 10,
+        "num_malicious": 2,
+        "num_rounds": 5,
+        "iid_rate": 0.8,
         "max_samples_per_client": None,
-        "local_epochs": LOCAL_EPOCHS,
-        "batch_size": BATCH_SIZE,
-        "eval_batch_size": EVAL_BATCH_SIZE,
+        "local_epochs": 1,
+        "batch_size": 128,
+        "eval_batch_size": 256,
     },
 }
 
-# Optional reduced-compute mode for smoke tests, kept for CLI compatibility.
-FAST_DEV_RUN = False
-FAST_DEV_NUM_CLIENTS = EXPERIMENT_PRESETS["lite"]["num_clients"]
-FAST_DEV_NUM_MALICIOUS = EXPERIMENT_PRESETS["lite"]["num_malicious"]
-FAST_DEV_NUM_ROUNDS = EXPERIMENT_PRESETS["lite"]["num_rounds"]
-FAST_DEV_MAX_SAMPLES_PER_CLIENT = EXPERIMENT_PRESETS["lite"]["max_samples_per_client"]
 
-
-def normalize_preset_name(name: str | None) -> str:
-    if name is None:
-        return DEFAULT_PRESET
-    normalized = PRESET_ALIASES.get(name, name)
-    if normalized not in EXPERIMENT_PRESETS:
-        valid = ", ".join(sorted(EXPERIMENT_PRESETS))
-        raise ValueError(f"Unknown preset '{name}'. Expected one of: {valid}.")
-    return normalized
-
-
-def resolve_preset(name: str | None = None) -> dict[str, object]:
-    normalized = normalize_preset_name(name)
+def resolve_preset(preset: PresetType | None = None) -> dict:
+    """Resolve a preset enum to its configuration dictionary."""
+    if preset is None:
+        preset = DEFAULT_PRESET
+    if not isinstance(preset, PresetType):
+        raise TypeError(f"Expected PresetType enum, got {type(preset)}")
     return {
-        "name": normalized,
-        **EXPERIMENT_PRESETS[normalized],
+        "name": preset.value,
+        **EXPERIMENT_PRESETS[preset],
     }
 
 
 def resolve_device(requested: str | None = None) -> str:
     import torch
 
-    if requested is not None:
-        if requested == "cuda" and torch.cuda.is_available():
-            return "cuda"
-        return "cpu"
+    if requested:
+        try:
+            device = torch.device(requested)
+        except Exception:
+            return "cpu"
 
-    if torch.cuda.is_available():
-        return "cuda"
-    return "cpu"
+        if device.type == "cuda" and not torch.cuda.is_available():
+            return "cpu"
+
+        if device.type == "mps":
+            if not (hasattr(torch.backends, "mps") and torch.backends.mps.is_available()):
+                return "cpu"
+
+        return str(device)
+
+    return "cuda" if torch.cuda.is_available() else "cpu"
