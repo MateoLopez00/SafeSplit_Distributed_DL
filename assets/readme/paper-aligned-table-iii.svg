@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="235" viewBox="0 0 980 235">
+  <rect width="980" height="235" fill="#ffffff"/>
+  <text x="490" y="32" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Paper Aligned Table III View</text>
+  <rect x="35" y="55" width="910" height="42" fill="#111827"/>
+  <g font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">
+    <text x="60" y="82">IID Rate</text>
+    <text x="205" y="82">None MA (%)</text>
+    <text x="375" y="82">None BA (%)</text>
+    <text x="555" y="82">SafeSplit MA (%)</text>
+    <text x="765" y="82">SafeSplit BA (%)</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="14" fill="#111827">
+    <rect x="35" y="97" width="910" height="34" fill="#f9fafb"/>
+    <text x="60" y="119">0.6</text>
+    <text x="205" y="119">49.81</text>
+    <text x="375" y="119">100.00</text>
+    <text x="555" y="119">41.64</text>
+    <text x="765" y="119" fill="#047857" font-weight="700">0.00</text>
+    <rect x="35" y="131" width="910" height="34" fill="#ffffff"/>
+    <text x="60" y="153">0.8</text>
+    <text x="205" y="153">52.70</text>
+    <text x="375" y="153">100.00</text>
+    <text x="555" y="153">45.40</text>
+    <text x="765" y="153" fill="#047857" font-weight="700">0.00</text>
+    <rect x="35" y="165" width="910" height="34" fill="#f9fafb"/>
+    <text x="60" y="187">1.0</text>
+    <text x="205" y="187">55.70</text>
+    <text x="375" y="187">100.00</text>
+    <text x="555" y="187">46.34</text>
+    <text x="765" y="187" fill="#047857" font-weight="700">0.00</text>
+  </g>
+  <rect x="35" y="55" width="910" height="144" fill="none" stroke="#d1d5db"/>
+  <line x1="165" y1="55" x2="165" y2="199" stroke="#d1d5db"/>
+  <line x1="335" y1="55" x2="335" y2="199" stroke="#d1d5db"/>
+  <line x1="515" y1="55" x2="515" y2="199" stroke="#d1d5db"/>
+  <line x1="725" y1="55" x2="725" y2="199" stroke="#d1d5db"/>
+</svg>

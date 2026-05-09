@@ -1,58 +1,63 @@
 # SafeSplit Midterm Reproduction
 
-This repository reproduces the midterm scope of **SafeSplit: A Novel Defense Against Client-Side Backdoor Attacks in Split Learning** (NDSS 2025) for a distributed deep learning course project. The implementation covers U-shaped split learning (`head → backbone → tail`), CIFAR-10 partitioning with controlled non-IID splits, client-side semantic and pixel backdoors, the SafeSplit defense (DCT and rotational scores with rollback), and reduced baselines (`none`, `safesplit`, `dp`, `krum`).
+This repository reproduces the midterm scope of **SafeSplit: A Novel Defense Against Client-Side Backdoor Attacks in Split Learning** (NDSS 2025). The project implements U-shaped split learning on CIFAR-10, client-side pixel and semantic backdoor attacks, the SafeSplit defense with frequency and rotational analysis, rollback to benign checkpoints, reduced baselines, and a temporal trust score extension for slow poisoning.
 
-## Notebook workflow
+## Notebook Workflow
 
-`SafeSplit_walkthrough.ipynb` is the primary interface. The notebook explains the pipeline, then runs experiments under `## Run Real Experiments In The Notebook` via `NOTEBOOK_EXPERIMENT_PRESET`, and produces the main comparisons under `## Midterm Comparison Suites`.
+`SafeSplit_walkthrough.ipynb` is the main interface for the project. It explains the implementation step by step, runs the reproduction experiments, formats the paper-aligned tables, and evaluates the extension.
 
-Presets:
+The experiment preset is controlled by `NOTEBOOK_EXPERIMENT_PRESET`:
 
-| Preset   | Role                                      |
-| -------- | ----------------------------------------- |
-| `lite`   | Short runs for sanity checks              |
-| `medium` | Interactive full notebook experiments     |
-| `paper`  | Settings closest to the reported midterm  |
+| Preset | Use |
+| --- | --- |
+| `lite` | Fast sanity checks |
+| `medium` | Interactive notebook runs |
+| `paper` | Main reported results |
 
-The same experiment logic lives in Python modules and can be invoked from `main.py` or `run_experiments.py` when batch or script execution is preferred.
+The same experiment runner is shared with `main.py` and `run_experiments.py`, so experiments can also be launched from Python scripts when needed.
 
-## Pipeline overview
+## Pipeline Overview
 
-The diagram summarizes the implemented flow: clients hold local CIFAR-10 data; activations pass through head, server backbone, and tail; updates are analyzed against a SafeSplit checkpoint history; benign updates are accepted and suspicious ones trigger rollback to the last accepted backbone state. A trust score extension from the original proposal is not implemented and is omitted from this diagram.
+The split model is organized as `client head -> server backbone -> client tail`. After each client update, SafeSplit compares recent backbone checkpoints using low frequency DCT signatures and rotational signatures. Updates that fit the benign majority are kept. Suspicious updates trigger rollback to the latest benign checkpoint. The extension adds a temporal trust score on top of SafeSplit to track clients that repeatedly show mild suspicious behavior.
 
 ```mermaid
 flowchart LR
-    A[Client local CIFAR-10 data] --> B[Client head]
+    A[Client CIFAR-10 data] --> B[Client head]
     B --> C[Server backbone]
     C --> D[Client tail]
     D --> E[Local loss and update]
-    E --> F[SafeSplit analysis on backbone checkpoints]
-    F --> G{Benign?}
-    G -->|Yes| H[Accept checkpoint and continue]
-    G -->|No| I[Rollback to latest benign checkpoint]
+    E --> F[Checkpoint history]
+    F --> G[DCT score]
+    F --> H[Rotational score]
+    G --> I[SafeSplit majority decision]
+    H --> I
+    I -->|Benign| J[Accept checkpoint]
+    I -->|Suspicious| K[Rollback to latest benign checkpoint]
+    I --> L[Temporal trust update]
+    L --> M[Low trust flag for repeated suspicious clients]
 ```
 
-## Repository layout
+## Repository Layout
 
 ```text
 SafeSplit_Distributed_DL/
-├─ SafeSplit_walkthrough.ipynb   # narrative, experiments, figures
-├─ main.py                       # shared experiment runner (notebook + CLI)
-├─ run_experiments.py            # optional matrix of CLI runs
+├─ SafeSplit_walkthrough.ipynb   # main explanation, experiments, tables, plots
+├─ main.py                       # shared experiment runner
+├─ run_experiments.py            # optional batch runner
 ├─ config.py                     # presets and experiment parameters
-├─ evaluate.py                   # main task and backdoor accuracy
+├─ evaluate.py                   # MA and BA evaluation
 ├─ data/
-│  ├─ dataset.py                 # CIFAR-10 loading and client splits
-│  └─ backdoor.py                # semantic and pixel triggers
+│  ├─ dataset.py                 # CIFAR-10 loading and client partitioning
+│  └─ backdoor.py                # pixel, semantic, and scheduled poisoning
 ├─ models/
-│  └─ split_models.py            # split model definitions
+│  └─ split_models.py            # client head, server backbone, client tail
 ├─ training/
-│  └─ trainer.py                 # split learning training loop
+│  └─ trainer.py                 # split learning loop
 ├─ defense/
-│  ├─ safesplit.py               # SafeSplit scoring and rollback
-│  └─ baselines.py               # DP and distance based aggregation baselines
-├─ results/                      # optional JSON outputs (gitignored)
-└─ assets/readme/                # tables and plots embedded below
+│  ├─ safesplit.py               # SafeSplit and temporal trust defense
+│  └─ baselines.py               # DP and KRUM style baselines
+├─ results/                      # optional JSON outputs
+└─ assets/readme/                # figures used in this report
 ```
 
 ## Execution
@@ -61,55 +66,68 @@ SafeSplit_Distributed_DL/
 pip install -r requirements.txt
 ```
 
-After installing dependencies, runs proceed in `SafeSplit_walkthrough.ipynb` by choosing `NOTEBOOK_EXPERIMENT_PRESET` among `lite`, `medium`, and `paper`, then executing the comparison suite cells. `NOTEBOOK_SAVE_JSON = True` persists JSON logs under `results/`.
+The recommended path is to open `SafeSplit_walkthrough.ipynb`, set `NOTEBOOK_EXPERIMENT_PRESET = "paper"`, restart the kernel, and run all cells. The notebook selects a reporting seed for the formal comparison suite and prints a reproduction sanity check before the extension section.
 
-Equivalent CLI examples:
+Optional CLI examples:
 
 ```bash
 python main.py --preset paper --defense safesplit --backdoor semantic
 python run_experiments.py --preset paper
 ```
 
-## Results summary
+## Main Results
 
-Figures and tables below were exported from the notebook suite (`## Midterm Comparison Suites`) under the `paper` preset unless noted otherwise in the project assets.
+The reported notebook run uses the `paper` preset and selected reporting seed `42`. The sanity check passed with SafeSplit semantic backdoor accuracy at `0.0` in the checked Table II and Table III rows.
 
-### Defense comparison (Table II correspondence)
+### Table II Comparison
 
-Without defense, semantic and pixel attacks reach near perfect backdoor accuracy (`BA`). SafeSplit drives `BA` down while keeping main task accuracy (`MA`) in a usable range.
+This comparison matches the paper's attack and defense layout. With no defense, both semantic and pixel attacks produce near perfect backdoor accuracy. SafeSplit suppresses the semantic attack completely and strongly reduces the pixel attack while keeping main task accuracy in the same range.
 
-![Table II results](assets/readme/table-ii-results.svg)
+![Paper aligned Table II](assets/readme/paper-aligned-table-ii.svg)
 
-![Table II chart](assets/readme/table-ii-chart.png)
+### Table III IID Sweep
 
-Representative values from the embedded run: `semantic + none` gives `BA = 100.0`; `semantic + safesplit` gives `BA = 0.0`; `pixel + none` gives `BA ≈ 99.99`; `pixel + safesplit` gives `BA = 6.62`.
+This sweep evaluates the semantic attack at IID rates `0.6`, `0.8`, and `1.0`. The undefended runs keep `BA = 100.0` at every IID rate. SafeSplit keeps `BA = 0.0` across all three IID settings, which resolves the previous caveat where the `IID = 0.6` SafeSplit row failed.
 
-### IID sweep (Table III correspondence)
+![Paper aligned Table III](assets/readme/paper-aligned-table-iii.svg)
 
-Increasing the IID fraction improves `MA` for both defended and undefended runs. SafeSplit maintains `BA = 0.0` on the semantic attack across IID rates `0.6`, `0.8`, and `1.0`, while `none` remains at `BA = 100.0`.
+![Table III trend](assets/readme/table-iii-trend.svg)
 
-![Table III results](assets/readme/table-iii-results.svg)
+### Reduced Baselines
 
-![Table III chart](assets/readme/table-iii-chart.png)
+The baseline panel compares no defense, simplified DP, a KRUM style distance baseline, and SafeSplit at `IID = 0.6` under a semantic attack. SafeSplit reaches `BA = 0.0` with higher `MA` than the other successful defense baselines in this run.
 
-### Baseline panel
+![Paper aligned baseline panel](assets/readme/paper-aligned-baseline-panel.svg)
 
-The reduced baseline panel compares `none`, simplified DP, a baseline modeled on KRUM, and SafeSplit. DP lowers `MA` without removing the backdoor in this setup; KRUM and SafeSplit both reach `BA = 0.0`, with SafeSplit offering the stronger `MA` tradeoff in the reported run (`none`: `MA = 43.34`, `BA = 100.0`; `dp`: `MA = 11.33`, `BA = 100.0`; `krum`: `MA = 31.85`, `BA = 0.0`; `safesplit`: `MA = 36.5`, `BA = 0.0`).
+## Extension: Temporal Trust Score
 
-![Baseline results](assets/readme/baseline-results.svg)
+The extension keeps the original SafeSplit reproduction unchanged and adds a slow poisoning experiment. A malicious client starts with mild poisoning and gradually increases the poison rate. SafeSplit still handles checkpoint rollback, while the trust score tracks repeated suspicious behavior by client.
 
-![Baseline chart](assets/readme/baseline-chart.png)
+Trust update rule:
 
-## Mapping to paper tables
+```text
+if suspiciousness < soft_threshold and update is in the SafeSplit benign set:
+    trust = min(1.0, trust + reward)
+else:
+    trust = max(0.0, trust - penalty * suspiciousness)
 
-In the notebook, `TABLE_II_CASES` aligns with the paper’s Table II comparison, `TABLE_III_CASES` with the IID sweep reported as Table III, and `BASELINE_CASES` with the reduced baseline figure panel. Earlier demonstration cells illustrate mechanics only and are excluded from those tabular comparisons.
-
-## CLI reference
-
-```bash
-python main.py --preset lite --defense safesplit --backdoor semantic
-python main.py --preset paper --defense none --backdoor pixel
-python run_experiments.py --preset lite
-python run_experiments.py --preset medium
-python run_experiments.py --preset paper
+client is low trust if trust <= trust_threshold
 ```
+
+The reported settings are `reward = 0.02`, `penalty = 0.10`, `soft_threshold = 0.60`, and `trust_threshold = 0.70`. The client set is fixed during training.
+
+![Temporal Trust summary](assets/readme/temporal-trust-summary.svg)
+
+![Temporal Trust MA and BA](assets/readme/temporal-trust-ma-ba.svg)
+
+![Temporal Trust final scores](assets/readme/temporal-trust-final-scores.svg)
+
+The slow poisoning results satisfy the extension criteria: no defense gives `BA = 100.0`, SafeSplit gives `BA = 0.0`, and SafeSplit with temporal trust also gives `BA = 0.0`. The trust version keeps similar `MA` to SafeSplit (`39.51` vs `39.08`), lowers malicious client trust to `0.63`, keeps benign trust higher at `0.82`, and produces `3` low trust flags.
+
+## Mapping To The Paper
+
+`TABLE_II_CASES` in the notebook corresponds to the paper's Table II style defense comparison. `TABLE_III_CASES` corresponds to the IID rate sweep in Table III. `BASELINE_CASES` gives the reduced baseline comparison used for the midterm report. The earlier notebook cells are explanatory and are not used as formal paper table results.
+
+## Summary
+
+The final run is submission ready. SafeSplit removes the semantic backdoor in the formal Table II and Table III comparisons, reduces the pixel backdoor substantially, and outperforms the reduced baselines on the main `IID = 0.6` semantic case. The temporal trust extension adds a clear slow poisoning scenario and shows that repeated mild suspicious behavior can be captured without sacrificing the SafeSplit backdoor defense.
