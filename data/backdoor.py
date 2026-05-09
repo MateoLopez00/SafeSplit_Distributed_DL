@@ -104,6 +104,7 @@ class PoisonedDataset(Dataset):
             chosen = [eligible[i] for i in perm[:poison_count]]
         else:
             chosen = []
+        self.ordered_poisoned_indices = chosen
         self.poisoned_indices = set(chosen)
 
     def __len__(self) -> int:
@@ -112,5 +113,35 @@ class PoisonedDataset(Dataset):
     def __getitem__(self, index: int):
         image, label = self.dataset[index]
         if index in self.poisoned_indices:
+            image, label = self.attack.poison_sample(image, int(label))
+        return image, label
+
+
+class ScheduledPoisonedDataset(PoisonedDataset):
+    def __init__(
+        self,
+        dataset: Dataset | Subset,
+        attack,
+        max_poisoned_data_rate: float,
+        seed: int,
+    ) -> None:
+        super().__init__(dataset, attack, max_poisoned_data_rate, seed)
+        self.max_poisoned_data_rate = max_poisoned_data_rate
+        self.current_poisoned_data_rate = 0.0
+        self._ordered_poisoned_indices = list(self.ordered_poisoned_indices)
+        self._active_poisoned_indices: set[int] = set()
+
+    def set_poisoned_data_rate(self, poisoned_data_rate: float) -> None:
+        self.current_poisoned_data_rate = max(0.0, min(float(poisoned_data_rate), self.max_poisoned_data_rate))
+        if self.max_poisoned_data_rate <= 0:
+            self._active_poisoned_indices = set()
+            return
+        active_fraction = self.current_poisoned_data_rate / self.max_poisoned_data_rate
+        active_count = int(round(len(self._ordered_poisoned_indices) * active_fraction))
+        self._active_poisoned_indices = set(self._ordered_poisoned_indices[:active_count])
+
+    def __getitem__(self, index: int):
+        image, label = self.dataset[index]
+        if index in self._active_poisoned_indices:
             image, label = self.attack.poison_sample(image, int(label))
         return image, label

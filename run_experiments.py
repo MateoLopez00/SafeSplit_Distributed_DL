@@ -67,6 +67,18 @@ def cli_args_to_overrides(args: list[str]) -> dict[str, object]:
         elif key == "--pdr":
             overrides["pdr"] = float(args[idx + 1])
             idx += 2
+        elif key == "--attack-schedule":
+            overrides["attack_schedule"] = args[idx + 1]
+            idx += 2
+        elif key == "--slow-pdr-start":
+            overrides["slow_pdr_start"] = float(args[idx + 1])
+            idx += 2
+        elif key == "--slow-pdr-end":
+            overrides["slow_pdr_end"] = float(args[idx + 1])
+            idx += 2
+        elif key == "--slow-ramp-rounds":
+            overrides["slow_ramp_rounds"] = int(args[idx + 1])
+            idx += 2
         elif key == "--device":
             overrides["device"] = args[idx + 1]
             idx += 2

@@ -23,6 +23,7 @@ class SplitLearningTrainer:
         weight_decay: float,
         local_epochs: int,
         defense=None,
+        poison_schedule: dict[str, float | int] | None = None,
     ) -> None:
         self.device = torch.device(device)
         self.current_head = copy.deepcopy(head0).to(self.device)
@@ -34,8 +35,10 @@ class SplitLearningTrainer:
         self.weight_decay = weight_decay
         self.local_epochs = local_epochs
         self.defense = defense
+        self.poison_schedule = poison_schedule or {}
         self.history: list[Checkpoint] = []
         self.last_selected_checkpoint: Checkpoint | None = None
+        self.defense_decisions: list[dict[str, object]] = []
 
     def _make_optimizers(self, head, backbone, tail):
         head_opt = SGD(head.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
@@ -103,7 +106,13 @@ class SplitLearningTrainer:
     def _select_checkpoint(self) -> Checkpoint:
         if self.defense is None:
             return copy.deepcopy(self.history[-1])
-        return self.defense.select_checkpoint(self.history)
+        checkpoint = self.defense.select_checkpoint(self.history)
+        decision_getter = getattr(self.defense, "get_latest_decision", None)
+        if callable(decision_getter):
+            decision = decision_getter()
+            if decision is not None:
+                self.defense_decisions.append(dict(decision))
+        return checkpoint
 
     def _load_checkpoint(self, checkpoint: Checkpoint) -> None:
         load_state_dict(self.current_head, checkpoint.head_state, self.device)
@@ -111,10 +120,31 @@ class SplitLearningTrainer:
         load_state_dict(self.current_tail, checkpoint.tail_state, self.device)
         self.last_selected_checkpoint = checkpoint
 
+    def _apply_poison_schedule(self, round_id: int) -> None:
+        if not self.poison_schedule:
+            return
+        start_pdr = float(self.poison_schedule.get("start_pdr", 0.0))
+        end_pdr = float(self.poison_schedule.get("end_pdr", start_pdr))
+        ramp_rounds = max(1, int(self.poison_schedule.get("ramp_rounds", 1)))
+        progress = min(1.0, round_id / max(1, ramp_rounds - 1))
+        current_pdr = start_pdr + (end_pdr - start_pdr) * progress
+        for loader in self.client_loaders:
+            dataset = getattr(loader, "dataset", None)
+            setter = getattr(dataset, "set_poisoned_data_rate", None)
+            if callable(setter):
+                setter(current_pdr)
+
+    def _trust_snapshot(self) -> dict[int, float] | None:
+        snapshot_getter = getattr(self.defense, "get_trust_snapshot", None)
+        if callable(snapshot_getter):
+            return snapshot_getter()
+        return None
+
     def run(self, num_rounds: int, test_loader, trigger_set=None):
         metrics = []
         global_step = 0
         for round_id in range(num_rounds):
+            self._apply_poison_schedule(round_id)
             for client_id in range(len(self.client_loaders)):
                 head, backbone, tail = self.train_one_client(client_id)
                 global_step += 1
@@ -135,6 +165,8 @@ class SplitLearningTrainer:
                     "selected_client": None
                     if self.last_selected_checkpoint is None
                     else self.last_selected_checkpoint.client_id,
+                    "trust_scores": self._trust_snapshot(),
+                    "defense_decisions": list(self.defense_decisions),
                 }
             )
         return metrics

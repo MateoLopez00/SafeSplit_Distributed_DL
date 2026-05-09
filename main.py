@@ -11,8 +11,16 @@ import torch
 from torch.utils.data import DataLoader
 
 import config as cfg
-from data import PixelTriggerAttack, PoisonedDataset, SemanticTriggerAttack, build_client_subsets, load_datasets, partition_data
-from defense import DifferentialPrivacyDefense, KrumStyleDefense, SafeSplitDefense
+from data import (
+    PixelTriggerAttack,
+    PoisonedDataset,
+    ScheduledPoisonedDataset,
+    SemanticTriggerAttack,
+    build_client_subsets,
+    load_datasets,
+    partition_data,
+)
+from defense import DifferentialPrivacyDefense, KrumStyleDefense, SafeSplitDefense, TemporalTrustSafeSplitDefense
 from evaluate import evaluate_backdoor, evaluate_model
 from models import get_split_model
 from training import SplitLearningTrainer
@@ -37,6 +45,10 @@ class ExperimentRequest:
     local_epochs: int = cfg.LOCAL_EPOCHS
     batch_size: int = cfg.BATCH_SIZE
     eval_batch_size: int = cfg.EVAL_BATCH_SIZE
+    attack_schedule: str = cfg.ATTACK_SCHEDULE
+    slow_pdr_start: float = cfg.SLOW_POISON_START_PDR
+    slow_pdr_end: float = cfg.SLOW_POISON_END_PDR
+    slow_ramp_rounds: int = cfg.SLOW_POISON_RAMP_ROUNDS
 
 
 def experiment_request_to_dict(request: ExperimentRequest) -> dict[str, object]:
@@ -63,6 +75,10 @@ def build_experiment_request(preset: str | None = None, **overrides) -> Experime
         "local_epochs": int(preset_values["local_epochs"]),
         "batch_size": int(preset_values["batch_size"]),
         "eval_batch_size": int(preset_values["eval_batch_size"]),
+        "attack_schedule": cfg.ATTACK_SCHEDULE,
+        "slow_pdr_start": cfg.SLOW_POISON_START_PDR,
+        "slow_pdr_end": cfg.SLOW_POISON_END_PDR,
+        "slow_ramp_rounds": int(preset_values["num_rounds"]),
     }
     for key, value in overrides.items():
         if value is not None:
@@ -78,8 +94,12 @@ def parse_args():
     parser.add_argument("--num-clients", type=int, default=None)
     parser.add_argument("--num-malicious", type=int, default=None)
     parser.add_argument("--iid-rate", type=float, default=None)
-    parser.add_argument("--defense", default="safesplit", choices=["none", "safesplit", "dp", "krum"])
+    parser.add_argument("--defense", default="safesplit", choices=["none", "safesplit", "safesplit_trust", "dp", "krum"])
     parser.add_argument("--backdoor", default=cfg.BACKDOOR_TYPE, choices=["pixel", "semantic", "none"])
+    parser.add_argument("--attack-schedule", default=None, choices=["static", "slow"])
+    parser.add_argument("--slow-pdr-start", type=float, default=None)
+    parser.add_argument("--slow-pdr-end", type=float, default=None)
+    parser.add_argument("--slow-ramp-rounds", type=int, default=None)
     parser.add_argument("--pdr", type=float, default=None)
     parser.add_argument("--device", default=None)
     parser.add_argument("--seed", type=int, default=cfg.SEED)
@@ -126,6 +146,18 @@ def build_defense(name: str, num_clients: int):
         return DifferentialPrivacyDefense(cfg.DP_CLIP_NORM, cfg.DP_NOISE_SCALE)
     if name == "krum":
         return KrumStyleDefense(window_size=num_clients)
+    if name == "safesplit_trust":
+        return TemporalTrustSafeSplitDefense(
+            window_size=num_clients,
+            low_freq_frac=cfg.DCT_LOW_FREQ_FRAC,
+            matrix_width=cfg.ROTATION_MATRIX_WIDTH,
+            num_clients=num_clients,
+            initial_trust=cfg.TRUST_INITIAL,
+            reward=cfg.TRUST_REWARD,
+            penalty=cfg.TRUST_PENALTY,
+            soft_threshold=cfg.TRUST_SOFT_THRESHOLD,
+            low_threshold=cfg.TRUST_LOW_THRESHOLD,
+        )
     return None
 
 
@@ -148,6 +180,10 @@ def build_experiment_request_from_args(args: argparse.Namespace) -> ExperimentRe
         local_epochs=args.local_epochs,
         batch_size=args.batch_size,
         eval_batch_size=args.eval_batch_size,
+        attack_schedule=args.attack_schedule,
+        slow_pdr_start=args.slow_pdr_start,
+        slow_pdr_end=args.slow_pdr_end,
+        slow_ramp_rounds=args.slow_ramp_rounds,
     )
 
 
@@ -156,7 +192,7 @@ def build_output_path(request: ExperimentRequest) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     iid_token = str(request.iid_rate).replace(".", "p")
     out_name = (
-        f"{cfg.DATASET.lower()}_{request.arch}_{request.defense}_{request.backdoor}_"
+        f"{cfg.DATASET.lower()}_{request.arch}_{request.defense}_{request.backdoor}_{request.attack_schedule}_"
         f"{request.preset}_iid{iid_token}_clients{request.num_clients}_mal{request.num_malicious}.json"
     )
     return out_dir / out_name
@@ -185,7 +221,11 @@ def run_experiment(request: ExperimentRequest) -> dict[str, object]:
     for client_id, subset in enumerate(client_subsets):
         dataset = subset
         if client_id in malicious_ids and attack is not None:
-            dataset = PoisonedDataset(subset, attack, request.pdr, seed=request.seed + client_id)
+            if request.attack_schedule == "slow":
+                dataset = ScheduledPoisonedDataset(subset, attack, request.slow_pdr_end, seed=request.seed + client_id)
+                dataset.set_poisoned_data_rate(request.slow_pdr_start)
+            else:
+                dataset = PoisonedDataset(subset, attack, request.pdr, seed=request.seed + client_id)
         client_loaders.append(DataLoader(dataset, batch_size=request.batch_size, shuffle=True, num_workers=0))
 
     test_loader = DataLoader(test_dataset, batch_size=request.eval_batch_size, shuffle=False, num_workers=0)
@@ -204,6 +244,13 @@ def run_experiment(request: ExperimentRequest) -> dict[str, object]:
         weight_decay=cfg.WEIGHT_DECAY,
         local_epochs=request.local_epochs,
         defense=defense,
+        poison_schedule={
+            "start_pdr": request.slow_pdr_start,
+            "end_pdr": request.slow_pdr_end,
+            "ramp_rounds": request.slow_ramp_rounds,
+        }
+        if request.attack_schedule == "slow"
+        else None,
     )
 
     history = trainer.run(num_rounds=request.num_rounds, test_loader=test_loader, trigger_set=trigger_set)
@@ -216,6 +263,13 @@ def run_experiment(request: ExperimentRequest) -> dict[str, object]:
             "dataset": cfg.DATASET,
             "device": device,
             "malicious_ids": sorted(malicious_ids),
+            "trust_parameters": {
+                "initial": cfg.TRUST_INITIAL,
+                "reward": cfg.TRUST_REWARD,
+                "penalty": cfg.TRUST_PENALTY,
+                "soft_threshold": cfg.TRUST_SOFT_THRESHOLD,
+                "low_threshold": cfg.TRUST_LOW_THRESHOLD,
+            },
         }
     )
     output = {

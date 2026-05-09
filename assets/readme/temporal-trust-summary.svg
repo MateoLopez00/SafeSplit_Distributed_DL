@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="235" viewBox="0 0 1120 235">
+  <rect width="1120" height="235" fill="#ffffff"/>
+  <text x="560" y="32" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Temporal Trust Extension Summary</text>
+  <rect x="25" y="55" width="1070" height="42" fill="#111827"/>
+  <g font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">
+    <text x="45" y="82">Label</text>
+    <text x="235" y="82">Defense</text>
+    <text x="390" y="82">Attack</text>
+    <text x="535" y="82">IID</text>
+    <text x="610" y="82">MA (%)</text>
+    <text x="705" y="82">BA (%)</text>
+    <text x="800" y="82">Mal Trust</text>
+    <text x="915" y="82">Benign Trust</text>
+    <text x="1030" y="82">Flags</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="13" fill="#111827">
+    <rect x="25" y="97" width="1070" height="34" fill="#f9fafb"/>
+    <text x="45" y="119">slow-none</text>
+    <text x="235" y="119">none</text>
+    <text x="390" y="119">slow semantic</text>
+    <text x="535" y="119">0.8</text>
+    <text x="610" y="119">51.34</text>
+    <text x="705" y="119">100.00</text>
+    <text x="800" y="119">-</text>
+    <text x="915" y="119">-</text>
+    <text x="1030" y="119">0</text>
+    <rect x="25" y="131" width="1070" height="34" fill="#ffffff"/>
+    <text x="45" y="153">slow-safesplit</text>
+    <text x="235" y="153">safesplit</text>
+    <text x="390" y="153">slow semantic</text>
+    <text x="535" y="153">0.8</text>
+    <text x="610" y="153">39.08</text>
+    <text x="705" y="153" fill="#047857" font-weight="700">0.00</text>
+    <text x="800" y="153">-</text>
+    <text x="915" y="153">-</text>
+    <text x="1030" y="153">0</text>
+    <rect x="25" y="165" width="1070" height="34" fill="#f9fafb"/>
+    <text x="45" y="187">slow-safesplit-trust</text>
+    <text x="235" y="187">safesplit_trust</text>
+    <text x="390" y="187">slow semantic</text>
+    <text x="535" y="187">0.8</text>
+    <text x="610" y="187">39.51</text>
+    <text x="705" y="187" fill="#047857" font-weight="700">0.00</text>
+    <text x="800" y="187" fill="#b45309" font-weight="700">0.63</text>
+    <text x="915" y="187" fill="#047857" font-weight="700">0.82</text>
+    <text x="1030" y="187">3</text>
+  </g>
+  <rect x="25" y="55" width="1070" height="144" fill="none" stroke="#d1d5db"/>
+  <line x1="215" y1="55" x2="215" y2="199" stroke="#d1d5db"/>
+  <line x1="370" y1="55" x2="370" y2="199" stroke="#d1d5db"/>
+  <line x1="515" y1="55" x2="515" y2="199" stroke="#d1d5db"/>
+  <line x1="590" y1="55" x2="590" y2="199" stroke="#d1d5db"/>
+  <line x1="685" y1="55" x2="685" y2="199" stroke="#d1d5db"/>
+  <line x1="780" y1="55" x2="780" y2="199" stroke="#d1d5db"/>
+  <line x1="895" y1="55" x2="895" y2="199" stroke="#d1d5db"/>
+  <line x1="1010" y1="55" x2="1010" y2="199" stroke="#d1d5db"/>
+</svg>
