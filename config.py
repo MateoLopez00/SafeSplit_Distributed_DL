@@ -102,6 +102,8 @@ class Preset(str, Enum):
 @dataclass(frozen=True, slots=True)
 class ExperimentPreset:
 
+    name: str
+
     arch: str
 
     num_clients: int
@@ -117,6 +119,20 @@ class ExperimentPreset:
     batch_size: int
     eval_batch_size: int
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "arch": self.arch,
+            "num_clients": self.num_clients,
+            "num_malicious": self.num_malicious,
+            "num_rounds": self.num_rounds,
+            "iid_rate": self.iid_rate,
+            "max_samples_per_client": self.max_samples_per_client,
+            "local_epochs": self.local_epochs,
+            "batch_size": self.batch_size,
+            "eval_batch_size": self.eval_batch_size,
+        }
+
 
 DEFAULT_PRESET = Preset.PAPER
 
@@ -127,6 +143,7 @@ PRESET_ALIASES: dict[str, Preset] = {
 EXPERIMENT_PRESETS: dict[Preset, ExperimentPreset] = {
 
     Preset.LITE: ExperimentPreset(
+        name="lite",
         arch="simple_cnn",
         num_clients=4,
         num_malicious=1,
@@ -139,6 +156,7 @@ EXPERIMENT_PRESETS: dict[Preset, ExperimentPreset] = {
     ),
 
     Preset.MEDIUM: ExperimentPreset(
+        name="medium",
         arch="resnet18",
         num_clients=6,
         num_malicious=1,
@@ -151,6 +169,7 @@ EXPERIMENT_PRESETS: dict[Preset, ExperimentPreset] = {
     ),
 
     Preset.PAPER: ExperimentPreset(
+        name="paper",
         arch=ARCH,
         num_clients=NUM_CLIENTS,
         num_malicious=NUM_MALICIOUS,
