@@ -12,6 +12,32 @@
       "schema_version": "v1",
       "seed": 42
     },
+    "0d68aac5f7061cac05ff9c14e76c711fd27bbd6ee9eb9c31f374bfa066a86cab": {
+      "created_at": "2026-05-25T18:48:49.104697+00:00",
+      "key": "0d68aac5f7061cac05ff9c14e76c711fd27bbd6ee9eb9c31f374bfa066a86cab",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "none",
+        "iid_rate": 0.6
+      },
+      "path": "entries/0d68aac5f7061cac05ff9c14e76c711fd27bbd6ee9eb9c31f374bfa066a86cab.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "1cce995c61bfec45fd89983d8c087e95386c26195956e90abb48e06a691d015b": {
+      "created_at": "2026-05-25T18:54:08.930365+00:00",
+      "key": "1cce995c61bfec45fd89983d8c087e95386c26195956e90abb48e06a691d015b",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "none",
+        "iid_rate": 1.0
+      },
+      "path": "entries/1cce995c61bfec45fd89983d8c087e95386c26195956e90abb48e06a691d015b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
     "1d79f90936587c4da31f11fc5733160144fc7393651a743b3a80f2c62cb2e6a1": {
       "created_at": "2026-05-25T17:21:30.055721+00:00",
       "key": "1d79f90936587c4da31f11fc5733160144fc7393651a743b3a80f2c62cb2e6a1",
@@ -89,6 +115,19 @@
       "schema_version": "v1",
       "seed": 44
     },
+    "4234c2b69aebef59c286886a6c1224d75643122ef623ebfe8453ae4fa07cbe8c": {
+      "created_at": "2026-05-25T18:56:53.541977+00:00",
+      "key": "4234c2b69aebef59c286886a6c1224d75643122ef623ebfe8453ae4fa07cbe8c",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "dp",
+        "iid_rate": 0.6
+      },
+      "path": "entries/4234c2b69aebef59c286886a6c1224d75643122ef623ebfe8453ae4fa07cbe8c.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
     "45db0ac03a3ea753ad52c62d4abaa380b181e0c0658ff914d06f2f06305e2ace": {
       "created_at": "2026-05-25T17:35:23.915217+00:00",
       "key": "45db0ac03a3ea753ad52c62d4abaa380b181e0c0658ff914d06f2f06305e2ace",
@@ -101,6 +140,19 @@
       "preset": "Preset.PAPER",
       "schema_version": "v1",
       "seed": 43
+    },
+    "4cff02b6c8e288d413124f133503e5adbed93aa53be3ab358d4f2cab37573437": {
+      "created_at": "2026-05-25T19:00:13.568579+00:00",
+      "key": "4cff02b6c8e288d413124f133503e5adbed93aa53be3ab358d4f2cab37573437",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "krum",
+        "iid_rate": 0.6
+      },
+      "path": "entries/4cff02b6c8e288d413124f133503e5adbed93aa53be3ab358d4f2cab37573437.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
     },
     "4d64a840b2a3ccce76341894f63dd1a62db933cc26b85cc0887f43cff4e42441": {
       "created_at": "2026-05-25T17:49:24.576361+00:00",
@@ -250,6 +302,19 @@
         "iid_rate": 1.0
       },
       "path": "entries/e316f5f0ad9aa0a4dfe98982be1349e5b437a91473b44a18bbceb71122972d1b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "eb49f148aa90bec1d0a7cce86ebdc803e7cbee15264bb553e3f4ca471b93e67a": {
+      "created_at": "2026-05-25T18:51:29.402622+00:00",
+      "key": "eb49f148aa90bec1d0a7cce86ebdc803e7cbee15264bb553e3f4ca471b93e67a",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "none",
+        "iid_rate": 0.8
+      },
+      "path": "entries/eb49f148aa90bec1d0a7cce86ebdc803e7cbee15264bb553e3f4ca471b93e67a.json",
       "preset": "Preset.PAPER",
       "schema_version": "v1",
       "seed": 42

@@ -1,0 +1,100 @@
+{
+  "created_at": "2026-05-25T18:51:29.402622+00:00",
+  "key": "eb49f148aa90bec1d0a7cce86ebdc803e7cbee15264bb553e3f4ca471b93e67a",
+  "label": "table-III-iid-0.8-none",
+  "overrides": {
+    "backdoor": "semantic",
+    "defense": "none",
+    "iid_rate": 0.8
+  },
+  "preset": "Preset.PAPER",
+  "result": {
+    "config": {
+      "arch": "resnet18",
+      "attack_schedule": "static",
+      "backdoor": "semantic",
+      "batch_size": 128,
+      "dataset": "CIFAR10",
+      "defense": "none",
+      "device": "cuda",
+      "eval_batch_size": 256,
+      "iid_rate": 0.8,
+      "local_epochs": 1,
+      "malicious_ids": [
+        0,
+        1
+      ],
+      "max_samples_per_client": null,
+      "num_clients": 10,
+      "num_malicious": 2,
+      "num_rounds": 5,
+      "out_dir": "/media/antonio/DATA/Documents/UniBern/Material/Distributed Deep Learning Systems/SafeSplit_Distributed_DL/results",
+      "pdr": 0.5,
+      "preset": "paper",
+      "seed": 42,
+      "slow_pdr_end": 0.5,
+      "slow_pdr_start": 0.05,
+      "slow_ramp_rounds": 5,
+      "trust_parameters": {
+        "initial": 1.0,
+        "low_threshold": 0.7,
+        "penalty": 0.1,
+        "reward": 0.02,
+        "soft_threshold": 0.6
+      },
+      "write_json": false
+    },
+    "final_BA": 100.0,
+    "final_MA": 53.1,
+    "history": [
+      {
+        "backdoor_ba": 0.0,
+        "clean_ma": 35.9,
+        "defense_decisions": [],
+        "round": 1,
+        "selected_client": 9,
+        "selected_step": 10,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 100.0,
+        "clean_ma": 40.65,
+        "defense_decisions": [],
+        "round": 2,
+        "selected_client": 9,
+        "selected_step": 20,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 100.0,
+        "clean_ma": 46.85,
+        "defense_decisions": [],
+        "round": 3,
+        "selected_client": 9,
+        "selected_step": 30,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 100.0,
+        "clean_ma": 50.96,
+        "defense_decisions": [],
+        "round": 4,
+        "selected_client": 9,
+        "selected_step": 40,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 100.0,
+        "clean_ma": 53.1,
+        "defense_decisions": [],
+        "round": 5,
+        "selected_client": 9,
+        "selected_step": 50,
+        "trust_scores": null
+      }
+    ],
+    "results_path": null
+  },
+  "schema_version": "v1",
+  "seed": 42
+}
