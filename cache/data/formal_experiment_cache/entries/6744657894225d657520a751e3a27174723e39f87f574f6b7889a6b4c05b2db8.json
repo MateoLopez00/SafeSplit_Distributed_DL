@@ -1,0 +1,100 @@
+{
+  "created_at": "2026-05-25T18:06:00.688520+00:00",
+  "key": "6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8",
+  "label": "table-III-iid-0.6-safesplit",
+  "overrides": {
+    "backdoor": "semantic",
+    "defense": "safesplit",
+    "iid_rate": 0.6
+  },
+  "preset": "Preset.PAPER",
+  "result": {
+    "config": {
+      "arch": "resnet18",
+      "attack_schedule": "static",
+      "backdoor": "semantic",
+      "batch_size": 128,
+      "dataset": "CIFAR10",
+      "defense": "safesplit",
+      "device": "cuda",
+      "eval_batch_size": 256,
+      "iid_rate": 0.6,
+      "local_epochs": 1,
+      "malicious_ids": [
+        1,
+        6
+      ],
+      "max_samples_per_client": null,
+      "num_clients": 10,
+      "num_malicious": 2,
+      "num_rounds": 5,
+      "out_dir": "/storage/homefs/aa25f094/SafeSplit_Distributed_DL/results",
+      "pdr": 0.5,
+      "preset": "paper",
+      "seed": 46,
+      "slow_pdr_end": 0.5,
+      "slow_pdr_start": 0.05,
+      "slow_ramp_rounds": 5,
+      "trust_parameters": {
+        "initial": 1.0,
+        "low_threshold": 0.7,
+        "penalty": 0.1,
+        "reward": 0.02,
+        "soft_threshold": 0.6
+      },
+      "write_json": false
+    },
+    "final_BA": 0.0,
+    "final_MA": 41.64,
+    "history": [
+      {
+        "backdoor_ba": 100.0,
+        "clean_ma": 27.55,
+        "defense_decisions": [],
+        "round": 1,
+        "selected_client": 8,
+        "selected_step": 9,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 0.0,
+        "clean_ma": 31.87,
+        "defense_decisions": [],
+        "round": 2,
+        "selected_client": 8,
+        "selected_step": 19,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 0.0,
+        "clean_ma": 34.64,
+        "defense_decisions": [],
+        "round": 3,
+        "selected_client": 8,
+        "selected_step": 29,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 0.0,
+        "clean_ma": 39.14,
+        "defense_decisions": [],
+        "round": 4,
+        "selected_client": 9,
+        "selected_step": 40,
+        "trust_scores": null
+      },
+      {
+        "backdoor_ba": 0.0,
+        "clean_ma": 41.64,
+        "defense_decisions": [],
+        "round": 5,
+        "selected_client": 9,
+        "selected_step": 50,
+        "trust_scores": null
+      }
+    ],
+    "results_path": null
+  },
+  "schema_version": "v1",
+  "seed": 46
+}

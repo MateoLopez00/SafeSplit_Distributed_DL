@@ -138,6 +138,15 @@ DEFAULT_PRESET = Preset.PAPER
 
 PRESET_ALIASES: dict[str, Preset] = {
     "fast-dev": Preset.LITE,
+    # Direct preset names
+    "lite": Preset.LITE,
+    "medium": Preset.MEDIUM,
+    "paper": Preset.PAPER,
+
+    # Python Enum string representations
+    "Preset.LITE": Preset.LITE,
+    "Preset.MEDIUM": Preset.MEDIUM,
+    "Preset.PAPER": Preset.PAPER,
 }
 
 EXPERIMENT_PRESETS: dict[Preset, ExperimentPreset] = {
@@ -195,9 +204,7 @@ FAST_DEV_MAX_SAMPLES_PER_CLIENT = EXPERIMENT_PRESETS[Preset.LITE].max_samples_pe
 # ==================================================================
 # Preset resolution
 # ==================================================================
-def normalize_preset(
-    preset: Preset | str | None,
-) -> Preset:
+def normalize_preset(preset: Preset | str | None) -> Preset:
 
     if preset is None:
         return DEFAULT_PRESET

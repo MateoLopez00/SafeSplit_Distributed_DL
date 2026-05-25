@@ -133,10 +133,38 @@ class FormalExperimentCache:
         self._write_index()
 
     def prefill(self, cases: list[FormalCase], seeds: tuple[int, ...] | list[int]) -> None:
-        for seed in seeds:
-            for case in cases:
-                self.get_or_run(case=case, seed=int(seed))
 
+        total = len(cases) * len(seeds)
+        print(f"Prefilling formal experiment cache ({total} experiments)...")
+
+        completed = 0
+        initial_stats = self.stats
+
+        for seed in seeds:
+
+            print(f"\nSeed {seed}")
+
+            for case in cases:
+
+                already_cached = self.has_entry(case=case, seed=int(seed))
+
+                status = "HIT" if already_cached else "RUN"
+                print(f"[{completed + 1}/{total}] {status:<4} {case.label}, seed={seed}")
+
+                self.get_or_run(case=case, seed=int(seed))
+                completed += 1
+
+        final_stats = self.stats
+
+        new_hits = final_stats["hits"]- initial_stats["hits"]
+        new_misses = final_stats["misses"]- initial_stats["misses"]
+        new_recomputed = final_stats["recomputed"] - initial_stats["recomputed"]
+
+        print("\nPrefill completed. Summary:"
+            f"\n  hits:        {new_hits}"
+            f"\n  misses:      {new_misses}"
+            f"\n  recomputed:  {new_recomputed}"
+        )
     def get_or_run(self, case: FormalCase, seed: int) -> ExperimentResult:
         key = make_cache_key(seed=seed, overrides=case.overrides, preset=self.preset, schema_version=self.schema_version)
 

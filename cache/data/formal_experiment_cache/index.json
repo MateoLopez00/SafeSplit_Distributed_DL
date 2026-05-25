@@ -1,0 +1,295 @@
+{
+  "entries": {
+    "07203d4c2dac00bb2732317c458268aeb2d1be75434389f6fc51260196badb22": {
+      "created_at": "2026-05-25T18:12:28.164165+00:00",
+      "key": "07203d4c2dac00bb2732317c458268aeb2d1be75434389f6fc51260196badb22",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "none"
+      },
+      "path": "entries/07203d4c2dac00bb2732317c458268aeb2d1be75434389f6fc51260196badb22.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "1d79f90936587c4da31f11fc5733160144fc7393651a743b3a80f2c62cb2e6a1": {
+      "created_at": "2026-05-25T17:21:30.055721+00:00",
+      "key": "1d79f90936587c4da31f11fc5733160144fc7393651a743b3a80f2c62cb2e6a1",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.6
+      },
+      "path": "entries/1d79f90936587c4da31f11fc5733160144fc7393651a743b3a80f2c62cb2e6a1.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "246ace46012fa1e99acfff4bc03189b3c19e42d3534c081a79e6bd56b0932f86": {
+      "created_at": "2026-05-25T17:57:46.278567+00:00",
+      "key": "246ace46012fa1e99acfff4bc03189b3c19e42d3534c081a79e6bd56b0932f86",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.8
+      },
+      "path": "entries/246ace46012fa1e99acfff4bc03189b3c19e42d3534c081a79e6bd56b0932f86.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 45
+    },
+    "252379b41783da9c97fc90d045f2fa0334c872c2cb4379778bf8d396aa5a0cbc": {
+      "created_at": "2026-05-25T18:03:18.872935+00:00",
+      "key": "252379b41783da9c97fc90d045f2fa0334c872c2cb4379778bf8d396aa5a0cbc",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit"
+      },
+      "path": "entries/252379b41783da9c97fc90d045f2fa0334c872c2cb4379778bf8d396aa5a0cbc.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 46
+    },
+    "2c8b38a1707fce5c33e3a7e043a15306aa3f061818056131697957f74a547aa2": {
+      "created_at": "2026-05-25T17:32:32.022362+00:00",
+      "key": "2c8b38a1707fce5c33e3a7e043a15306aa3f061818056131697957f74a547aa2",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.6
+      },
+      "path": "entries/2c8b38a1707fce5c33e3a7e043a15306aa3f061818056131697957f74a547aa2.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 43
+    },
+    "32aaf70f7a65aed3b1eff1473939ef96e623a25baa94c88dd685ee0aad3fa20c": {
+      "created_at": "2026-05-25T17:24:19.422238+00:00",
+      "key": "32aaf70f7a65aed3b1eff1473939ef96e623a25baa94c88dd685ee0aad3fa20c",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.8
+      },
+      "path": "entries/32aaf70f7a65aed3b1eff1473939ef96e623a25baa94c88dd685ee0aad3fa20c.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "3cbbfbdcba5ecf138bf1260d6d06fbb83a3612179ee5751af3a480deece4b1d7": {
+      "created_at": "2026-05-25T17:46:35.946738+00:00",
+      "key": "3cbbfbdcba5ecf138bf1260d6d06fbb83a3612179ee5751af3a480deece4b1d7",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.8
+      },
+      "path": "entries/3cbbfbdcba5ecf138bf1260d6d06fbb83a3612179ee5751af3a480deece4b1d7.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 44
+    },
+    "45db0ac03a3ea753ad52c62d4abaa380b181e0c0658ff914d06f2f06305e2ace": {
+      "created_at": "2026-05-25T17:35:23.915217+00:00",
+      "key": "45db0ac03a3ea753ad52c62d4abaa380b181e0c0658ff914d06f2f06305e2ace",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.8
+      },
+      "path": "entries/45db0ac03a3ea753ad52c62d4abaa380b181e0c0658ff914d06f2f06305e2ace.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 43
+    },
+    "4d64a840b2a3ccce76341894f63dd1a62db933cc26b85cc0887f43cff4e42441": {
+      "created_at": "2026-05-25T17:49:24.576361+00:00",
+      "key": "4d64a840b2a3ccce76341894f63dd1a62db933cc26b85cc0887f43cff4e42441",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 1.0
+      },
+      "path": "entries/4d64a840b2a3ccce76341894f63dd1a62db933cc26b85cc0887f43cff4e42441.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 44
+    },
+    "52998f6c6e79be2ca6ebb041b93b10e56c2eabcec1cc4984062edd19eed84dcc": {
+      "created_at": "2026-05-25T17:18:40.167544+00:00",
+      "key": "52998f6c6e79be2ca6ebb041b93b10e56c2eabcec1cc4984062edd19eed84dcc",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit"
+      },
+      "path": "entries/52998f6c6e79be2ca6ebb041b93b10e56c2eabcec1cc4984062edd19eed84dcc.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "54fcca12a431ea281d77cb5edd3f7931a4dc1e40f1f25afd7e33a97bfb0272a2": {
+      "created_at": "2026-05-25T18:00:29.639533+00:00",
+      "key": "54fcca12a431ea281d77cb5edd3f7931a4dc1e40f1f25afd7e33a97bfb0272a2",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 1.0
+      },
+      "path": "entries/54fcca12a431ea281d77cb5edd3f7931a4dc1e40f1f25afd7e33a97bfb0272a2.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 45
+    },
+    "6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8": {
+      "created_at": "2026-05-25T18:06:00.688520+00:00",
+      "key": "6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.6
+      },
+      "path": "entries/6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 46
+    },
+    "6eff145bbd44f66681d5d9bb1286d60b7bf64f008a4e9c6d6e5d4262fd9f207b": {
+      "created_at": "2026-05-25T17:55:00.803610+00:00",
+      "key": "6eff145bbd44f66681d5d9bb1286d60b7bf64f008a4e9c6d6e5d4262fd9f207b",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.6
+      },
+      "path": "entries/6eff145bbd44f66681d5d9bb1286d60b7bf64f008a4e9c6d6e5d4262fd9f207b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 45
+    },
+    "85e085647d532ec16b1cec3d765f74e5fd336ec4c6a7ae81723c51543e15fc01": {
+      "created_at": "2026-05-25T17:29:47.998763+00:00",
+      "key": "85e085647d532ec16b1cec3d765f74e5fd336ec4c6a7ae81723c51543e15fc01",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit"
+      },
+      "path": "entries/85e085647d532ec16b1cec3d765f74e5fd336ec4c6a7ae81723c51543e15fc01.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 43
+    },
+    "92b482be715009e08c0d8df86d8658ddd33d6fbd0cd9e65406b8773a714cff5a": {
+      "created_at": "2026-05-25T17:38:16.944186+00:00",
+      "key": "92b482be715009e08c0d8df86d8658ddd33d6fbd0cd9e65406b8773a714cff5a",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 1.0
+      },
+      "path": "entries/92b482be715009e08c0d8df86d8658ddd33d6fbd0cd9e65406b8773a714cff5a.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 43
+    },
+    "95ab1b0524cbdd15871e9822c4834957e835dfba248b609b3cef4027dcc7a48c": {
+      "created_at": "2026-05-25T17:43:47.981190+00:00",
+      "key": "95ab1b0524cbdd15871e9822c4834957e835dfba248b609b3cef4027dcc7a48c",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.6
+      },
+      "path": "entries/95ab1b0524cbdd15871e9822c4834957e835dfba248b609b3cef4027dcc7a48c.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 44
+    },
+    "a9971c9364d807d59850e80940434f2f798f2f4aaedeed887d2e401b252b62a0": {
+      "created_at": "2026-05-25T17:52:13.556835+00:00",
+      "key": "a9971c9364d807d59850e80940434f2f798f2f4aaedeed887d2e401b252b62a0",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit"
+      },
+      "path": "entries/a9971c9364d807d59850e80940434f2f798f2f4aaedeed887d2e401b252b62a0.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 45
+    },
+    "b6fb9f16889a7a3ebbad7caabc489eb361cc7564368a5f5bcbf0ebd8a3e68044": {
+      "created_at": "2026-05-25T18:13:32.311711+00:00",
+      "key": "b6fb9f16889a7a3ebbad7caabc489eb361cc7564368a5f5bcbf0ebd8a3e68044",
+      "overrides": {
+        "backdoor": "pixel",
+        "defense": "none"
+      },
+      "path": "entries/b6fb9f16889a7a3ebbad7caabc489eb361cc7564368a5f5bcbf0ebd8a3e68044.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "dee0f9dee6a6595402e845665c47308bf5cbc47e70372f503c9ef267af7a893c": {
+      "created_at": "2026-05-25T18:11:27.526949+00:00",
+      "key": "dee0f9dee6a6595402e845665c47308bf5cbc47e70372f503c9ef267af7a893c",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 1.0
+      },
+      "path": "entries/dee0f9dee6a6595402e845665c47308bf5cbc47e70372f503c9ef267af7a893c.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 46
+    },
+    "e316f5f0ad9aa0a4dfe98982be1349e5b437a91473b44a18bbceb71122972d1b": {
+      "created_at": "2026-05-25T17:27:04.024626+00:00",
+      "key": "e316f5f0ad9aa0a4dfe98982be1349e5b437a91473b44a18bbceb71122972d1b",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 1.0
+      },
+      "path": "entries/e316f5f0ad9aa0a4dfe98982be1349e5b437a91473b44a18bbceb71122972d1b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
+    "ef8de5c3545046762f2ba5e54ff79411424f2cebc5f4e46f993766e910588892": {
+      "created_at": "2026-05-25T18:08:43.985137+00:00",
+      "key": "ef8de5c3545046762f2ba5e54ff79411424f2cebc5f4e46f993766e910588892",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "iid_rate": 0.8
+      },
+      "path": "entries/ef8de5c3545046762f2ba5e54ff79411424f2cebc5f4e46f993766e910588892.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 46
+    },
+    "f462250ca499da86be0dc9aafc28f5180cee14fe0ccf3442d404f394872d889b": {
+      "created_at": "2026-05-25T17:40:59.751281+00:00",
+      "key": "f462250ca499da86be0dc9aafc28f5180cee14fe0ccf3442d404f394872d889b",
+      "overrides": {
+        "backdoor": "semantic",
+        "defense": "safesplit"
+      },
+      "path": "entries/f462250ca499da86be0dc9aafc28f5180cee14fe0ccf3442d404f394872d889b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 44
+    },
+    "f9c06b0bbbb99bd151e9a5f0d3039e48eafb1b4adc9e3ba1fd125fe94deadf3b": {
+      "created_at": "2026-05-25T18:16:19.075516+00:00",
+      "key": "f9c06b0bbbb99bd151e9a5f0d3039e48eafb1b4adc9e3ba1fd125fe94deadf3b",
+      "overrides": {
+        "backdoor": "pixel",
+        "defense": "safesplit"
+      },
+      "path": "entries/f9c06b0bbbb99bd151e9a5f0d3039e48eafb1b4adc9e3ba1fd125fe94deadf3b.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    }
+  }
+}
