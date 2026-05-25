@@ -1,81 +1,146 @@
-"""
-SafeSplit Configuration
-Mirrors the experimental setup from the NDSS 2025 paper.
-"""
+from pathlib import Path
 
-import os
 
-# ─── Paths ────────────────────────────────────────────────────────────────────
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data_cache")
-CKPT_DIR = os.path.join(BASE_DIR, "checkpoints")
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data_cache"
+RESULTS_DIR = BASE_DIR / "results"
 
-# ─── Training Setup ───────────────────────────────────────────────────────────
-NUM_CLIENTS       = 10       # default number of clients (N)
-NUM_MALICIOUS     = 2        # malicious clients (< N/2)
-NUM_ROUNDS        = 50       # training rounds (R)
-BATCH_SIZE        = 64
-LOCAL_EPOCHS      = 1        # epochs per client per round
-LR                = 0.01
-MOMENTUM          = 0.9
-WEIGHT_DECAY      = 1e-4
+# Reproduction scope
+DATASET = "CIFAR10"
+ARCH = "resnet18"
+NUM_CLASSES = 10
 
-# ─── Data / IID ───────────────────────────────────────────────────────────────
-IID_RATE          = 0.8      # fraction of each client's data drawn uniformly
-                             # 1.0 = full IID, 0.0 = fully non-IID
+# Split learning setup
+NUM_CLIENTS = 10
+NUM_MALICIOUS = 2
+NUM_ROUNDS = 5
+LOCAL_EPOCHS = 1
+BATCH_SIZE = 128
+EVAL_BATCH_SIZE = 256
+LR = 1e-3
+WEIGHT_DECAY = 5e-4
+MOMENTUM = 0.9
+SEED = 42
+IID_RATE = 0.8
 
-# ─── Backdoor Attack ──────────────────────────────────────────────────────────
-BACKDOOR_TYPE     = "pixel"  # "pixel" | "semantic"
-POISONED_DATA_RATE = 0.75   # fraction of malicious client's data that is poisoned
-TRIGGER_SIZE      = 5        # pixel-trigger square side (pixels)
-TRIGGER_POS       = "bottom-right"
-BACKDOOR_TARGET   = 0        # target class for backdoor (0 = airplane for CIFAR-10)
+# Attack setup
+BACKDOOR_TYPE = "semantic"
+PIXEL_TARGET_LABEL = 0
+SEMANTIC_SOURCE_LABEL = 1
+SEMANTIC_TARGET_LABEL = 2
+POISONED_DATA_RATE = 0.5
+TRIGGER_SIZE = 4
+TRIGGER_POS = "bottom-right"
 
-# Semantic backdoor (CIFAR-10): cars (label 1) with striped background → birds (label 2)
-SEMANTIC_SOURCE_LABEL = 1    # "car"
-SEMANTIC_TARGET_LABEL = 2    # "bird"
+# SafeSplit setup
+SAFE_SPLIT_WINDOW = NUM_CLIENTS
+DCT_LOW_FREQ_FRAC = 0.25
+ROTATION_MATRIX_WIDTH = 128
+EPS = 1e-8
 
-# ─── Dataset ──────────────────────────────────────────────────────────────────
-DATASET           = "CIFAR10" # CIFAR10 | MNIST | FMNIST | CIFAR100 | GTSRB
-NUM_CLASSES_MAP   = {
-    "CIFAR10":  10,
-    "MNIST":    10,
-    "FMNIST":   10,
-    "CIFAR100": 100,
-    "GTSRB":    43,
+# Temporal trust extension
+TRUST_INITIAL = 1.0
+TRUST_REWARD = 0.02
+TRUST_PENALTY = 0.10
+TRUST_SOFT_THRESHOLD = 0.60
+TRUST_LOW_THRESHOLD = 0.70
+
+# Ratchet extension
+TRUST_RATCHET_FLOOR_BASE      = 0.25  # matches the hardcoded floor in base TemporalTrust
+TRUST_RATCHET_STEP            = 0.10  # floor increase per flagged update
+TRUST_RATCHET_MAX_FLOOR       = 1.0   # cap on ratcheted floor
+TRUST_RATCHET_DECAY           = 0.20  # offense count reduction per clearly-clean update
+TRUST_RATCHET_DECAY_THRESHOLD = 0.40  # suspiciousness must be below this to earn decay
+
+# Activation clustering extension
+ACTIVATION_N_REFERENCE    = 256   # reference images drawn from clean test set
+ACTIVATION_PCA_COMPONENTS = 10    # PCA dims before k-means
+
+# Slow poisoning extension
+ATTACK_SCHEDULE = "static"
+SLOW_POISON_START_PDR = 0.05
+SLOW_POISON_END_PDR = POISONED_DATA_RATE
+SLOW_POISON_RAMP_ROUNDS = NUM_ROUNDS
+
+# Baselines
+DP_CLIP_NORM = 1.0
+DP_NOISE_SCALE = 1e-3
+
+# Shared experiment presets
+DEFAULT_PRESET = "paper"
+PRESET_ALIASES = {
+    "fast-dev": "lite",
 }
-NUM_CLASSES       = NUM_CLASSES_MAP[DATASET]
-
-# ─── Model Architecture ───────────────────────────────────────────────────────
-# Mapping from dataset to default architecture (Table I of the paper)
-ARCH_MAP = {
-    "CIFAR10":  "resnet18",    # primary
-    "MNIST":    "simple_cnn",
-    "FMNIST":   "simple_cnn",
-    "CIFAR100": "wide_resnet50",
-    "GTSRB":    "micronnet",
+EXPERIMENT_PRESETS = {
+    "lite": {
+        "arch": "simple_cnn",
+        "num_clients": 4,
+        "num_malicious": 1,
+        "num_rounds": 1,
+        "iid_rate": IID_RATE,
+        "max_samples_per_client": 256,
+        "local_epochs": 1,
+        "batch_size": 64,
+        "eval_batch_size": 128,
+    },
+    "medium": {
+        "arch": "resnet18",
+        "num_clients": 6,
+        "num_malicious": 1,
+        "num_rounds": 2,
+        "iid_rate": IID_RATE,
+        "max_samples_per_client": 1024,
+        "local_epochs": 1,
+        "batch_size": 96,
+        "eval_batch_size": 128,
+    },
+    "paper": {
+        "arch": ARCH,
+        "num_clients": NUM_CLIENTS,
+        "num_malicious": NUM_MALICIOUS,
+        "num_rounds": NUM_ROUNDS,
+        "iid_rate": IID_RATE,
+        "max_samples_per_client": None,
+        "local_epochs": LOCAL_EPOCHS,
+        "batch_size": BATCH_SIZE,
+        "eval_batch_size": EVAL_BATCH_SIZE,
+    },
 }
-ARCHITECTURE      = ARCH_MAP[DATASET]
 
-# Cut-layer configuration: how many ResNet-18 blocks go to the backbone
-# 2 | 3 | 4 (default = 4, i.e. all blocks on the server)
-RESNET_BACKBONE_BLOCKS = 4
+# Optional reduced-compute mode for smoke tests, kept for CLI compatibility.
+FAST_DEV_RUN = False
+FAST_DEV_NUM_CLIENTS = EXPERIMENT_PRESETS["lite"]["num_clients"]
+FAST_DEV_NUM_MALICIOUS = EXPERIMENT_PRESETS["lite"]["num_malicious"]
+FAST_DEV_NUM_ROUNDS = EXPERIMENT_PRESETS["lite"]["num_rounds"]
+FAST_DEV_MAX_SAMPLES_PER_CLIENT = EXPERIMENT_PRESETS["lite"]["max_samples_per_client"]
 
-# ─── SafeSplit Hyperparameters ────────────────────────────────────────────────
-# FIFO window = N clients; majority = N//2 + 1
-# Low-frequency fraction for 2-D DCT (fraction of coefficients kept per dimension)
-DCT_LOW_FREQ_FRAC = 0.5      # keep top-left 50% in each DCT dimension
 
-# ─── Adaptive-Attack Hyperparameters ─────────────────────────────────────────
-ADAPTIVE_ALPHA    = 0.5      # weight for backdoor vs. anomaly-evasion loss
+def normalize_preset_name(name: str | None) -> str:
+    if name is None:
+        return DEFAULT_PRESET
+    normalized = PRESET_ALIASES.get(name, name)
+    if normalized not in EXPERIMENT_PRESETS:
+        valid = ", ".join(sorted(EXPERIMENT_PRESETS))
+        raise ValueError(f"Unknown preset '{name}'. Expected one of: {valid}.")
+    return normalized
 
-# ─── Differential Privacy Baseline ───────────────────────────────────────────
-DP_CLIP_NORM      = 1.0
-DP_NOISE_SCALE    = 0.001
 
-# ─── Device ───────────────────────────────────────────────────────────────────
-DEVICE            = "cuda"   # overridden to "cpu" automatically if no GPU
+def resolve_preset(name: str | None = None) -> dict[str, object]:
+    normalized = normalize_preset_name(name)
+    return {
+        "name": normalized,
+        **EXPERIMENT_PRESETS[normalized],
+    }
 
-# ─── Logging ──────────────────────────────────────────────────────────────────
-LOG_INTERVAL      = 10       # print stats every N rounds
-SEED              = 42
+
+def resolve_device(requested: str | None = None) -> str:
+    import torch
+
+    if requested is not None:
+        if requested == "cuda" and torch.cuda.is_available():
+            return "cuda"
+        return "cpu"
+
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"

@@ -1,0 +1,58 @@
+{
+  "sweep": [
+    {
+      "num_malicious": 2,
+      "num_clients": 10,
+      "final_MA": 46.86,
+      "final_BA": 0.0
+    },
+    {
+      "num_malicious": 3,
+      "num_clients": 10,
+      "final_MA": 45.65,
+      "final_BA": 0.0
+    },
+    {
+      "num_malicious": 4,
+      "num_clients": 10,
+      "final_MA": 45.79,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 5,
+      "num_clients": 10,
+      "final_MA": 39.15,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 6,
+      "num_clients": 10,
+      "final_MA": 38.14,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 7,
+      "num_clients": 10,
+      "final_MA": 43.32,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 8,
+      "num_clients": 10,
+      "final_MA": 43.46,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 9,
+      "num_clients": 10,
+      "final_MA": 39.2,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 10,
+      "num_clients": 10,
+      "final_MA": 38.71,
+      "final_BA": 100.0
+    }
+  ]
+}

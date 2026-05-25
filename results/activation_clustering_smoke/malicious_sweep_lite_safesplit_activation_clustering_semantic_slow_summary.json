@@ -1,0 +1,16 @@
+{
+  "sweep": [
+    {
+      "num_malicious": 2,
+      "num_clients": 4,
+      "final_MA": 5.34,
+      "final_BA": 100.0
+    },
+    {
+      "num_malicious": 3,
+      "num_clients": 4,
+      "final_MA": 7.28,
+      "final_BA": 100.0
+    }
+  ]
+}
