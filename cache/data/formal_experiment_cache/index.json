@@ -25,6 +25,21 @@
       "schema_version": "v1",
       "seed": 42
     },
+    "1aeb0cf00590c4b3b77d79d81cb601145192c505ce6d8f56ff27465f6f60f925": {
+      "created_at": "2026-05-25T19:19:53.581155+00:00",
+      "key": "1aeb0cf00590c4b3b77d79d81cb601145192c505ce6d8f56ff27465f6f60f925",
+      "overrides": {
+        "attack_schedule": "slow",
+        "backdoor": "semantic",
+        "defense": "none",
+        "slow_pdr_end": 0.5,
+        "slow_pdr_start": 0.05
+      },
+      "path": "entries/1aeb0cf00590c4b3b77d79d81cb601145192c505ce6d8f56ff27465f6f60f925.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
     "1cce995c61bfec45fd89983d8c087e95386c26195956e90abb48e06a691d015b": {
       "created_at": "2026-05-25T18:54:08.930365+00:00",
       "key": "1cce995c61bfec45fd89983d8c087e95386c26195956e90abb48e06a691d015b",
@@ -192,6 +207,21 @@
       "schema_version": "v1",
       "seed": 45
     },
+    "65db76cb52ccf8bee0642d3faf78d9e1abf1e11c919244d2f71d7a4683e7e0b0": {
+      "created_at": "2026-05-25T19:26:41.106132+00:00",
+      "key": "65db76cb52ccf8bee0642d3faf78d9e1abf1e11c919244d2f71d7a4683e7e0b0",
+      "overrides": {
+        "attack_schedule": "slow",
+        "backdoor": "semantic",
+        "defense": "safesplit",
+        "slow_pdr_end": 0.5,
+        "slow_pdr_start": 0.05
+      },
+      "path": "entries/65db76cb52ccf8bee0642d3faf78d9e1abf1e11c919244d2f71d7a4683e7e0b0.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
+    },
     "6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8": {
       "created_at": "2026-05-25T18:06:00.688520+00:00",
       "key": "6744657894225d657520a751e3a27174723e39f87f574f6b7889a6b4c05b2db8",
@@ -217,6 +247,21 @@
       "preset": "Preset.PAPER",
       "schema_version": "v1",
       "seed": 45
+    },
+    "70167242cb0b469afe52cc38f3254e2b6f78ed9bfdb745aa5ccaba59b183220a": {
+      "created_at": "2026-05-25T19:33:16.044013+00:00",
+      "key": "70167242cb0b469afe52cc38f3254e2b6f78ed9bfdb745aa5ccaba59b183220a",
+      "overrides": {
+        "attack_schedule": "slow",
+        "backdoor": "semantic",
+        "defense": "safesplit_trust",
+        "slow_pdr_end": 0.5,
+        "slow_pdr_start": 0.05
+      },
+      "path": "entries/70167242cb0b469afe52cc38f3254e2b6f78ed9bfdb745aa5ccaba59b183220a.json",
+      "preset": "Preset.PAPER",
+      "schema_version": "v1",
+      "seed": 42
     },
     "85e085647d532ec16b1cec3d765f74e5fd336ec4c6a7ae81723c51543e15fc01": {
       "created_at": "2026-05-25T17:29:47.998763+00:00",
