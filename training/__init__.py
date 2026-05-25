@@ -1,3 +1,3 @@
-from .trainer import SplitLearningTrainer
+from .trainer import RoundMetrics, SplitLearningTrainer
 
-__all__ = ["SplitLearningTrainer"]
+__all__ = ["RoundMetrics", "SplitLearningTrainer"]

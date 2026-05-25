@@ -1,4 +1,6 @@
-torch>=2.2.0
-torchvision>=0.17.0
-numpy>=1.26.0
-scipy>=1.11.0
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+torch>=2.2
+torchvision>=0.17
+ipython>=8.0

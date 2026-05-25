@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from main import build_experiment_request, run_experiment
+from utils.experiment_result import ExperimentResult
 
 
 TABLE_II_RUNS = [
@@ -96,7 +97,7 @@ def cli_args_to_overrides(args: list[str]) -> dict[str, object]:
     return overrides
 
 
-def run_one(args: list[str], preset: str | None = None) -> dict[str, object]:
+def run_one(args: list[str], preset: str | None = None) -> ExperimentResult:
     overrides = cli_args_to_overrides(args)
     effective_preset = overrides.pop("preset", preset)
     request = build_experiment_request(preset=effective_preset, **overrides)
@@ -124,7 +125,7 @@ def main():
             if args.fast_dev_run:
                 effective_args.append("--fast-dev-run")
             result = run_one(effective_args, preset=args.preset)
-            outputs[name].append({"args": effective_args, "result": result})
+            outputs[name].append({"args": effective_args, "result": result.to_dict()})
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)

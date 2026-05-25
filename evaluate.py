@@ -7,11 +7,16 @@ from torch.utils.data import DataLoader, TensorDataset
 
 @torch.no_grad()
 def evaluate_model(head, backbone, tail, loader, device) -> float:
+    head = head.to(device)
+    backbone = backbone.to(device)
+    tail = tail.to(device)
+
     head.eval()
     backbone.eval()
     tail.eval()
-    correct = 0
-    total = 0
+
+    correct, total = 0, 0
+
     for inputs, targets in loader:
         inputs = inputs.to(device)
         targets = targets.to(device)
@@ -27,6 +32,9 @@ def evaluate_backdoor(head, backbone, tail, trigger_set, device, batch_size: int
     if not trigger_set:
         return 0.0
 
+    head = head.to(device)
+    backbone = backbone.to(device)
+    tail = tail.to(device)
     head.eval()
     backbone.eval()
     tail.eval()
@@ -35,8 +43,8 @@ def evaluate_backdoor(head, backbone, tail, trigger_set, device, batch_size: int
     labels = torch.tensor([item[1] for item in trigger_set], dtype=torch.long)
     loader = DataLoader(TensorDataset(images, labels), batch_size=batch_size, shuffle=False)
 
-    correct = 0
-    total = 0
+    correct, total = 0, 0
+
     for inputs, targets in loader:
         inputs = inputs.to(device)
         targets = targets.to(device)
@@ -52,6 +60,7 @@ def confusion_matrix(head, backbone, tail, loader, device, num_classes: int) -> 
     head.eval()
     backbone.eval()
     tail.eval()
+
     matrix = np.zeros((num_classes, num_classes), dtype=np.int64)
     for inputs, targets in loader:
         logits = tail(backbone(head(inputs.to(device))))

@@ -1,54 +1,108 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Any
 
 import torch
 import torch.nn.functional as F
+from torch import Tensor
+from torch import nn
 from torch.optim import SGD
+from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 
-from defense import Checkpoint, clone_state_dict, diff_state_dict, load_state_dict
+from defense import Checkpoint, DefenseInterface, clone_state_dict, diff_state_dict, load_state_dict
 from evaluate import evaluate_backdoor, evaluate_model
+
+
+@dataclass(slots=True)
+class RoundMetrics:
+    round: int
+    clean_ma: float
+    backdoor_ba: float
+    selected_step: int | None
+    selected_client: int | None
+    trust_scores: dict[int, float] | None
+    defense_decisions: list[dict[str, object]]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "round": self.round,
+            "clean_ma": float(self.clean_ma),
+            "backdoor_ba": float(self.backdoor_ba),
+            "selected_step": self.selected_step,
+            "selected_client": self.selected_client,
+            "trust_scores": self.trust_scores,
+            "defense_decisions": self.defense_decisions,
+        }
+
+    # Backward-compatible dictionary-like access for notebook cells.
+    def __getitem__(self, key: str) -> Any:
+        return self.to_dict()[key]
 
 
 class SplitLearningTrainer:
     def __init__(
         self,
-        head0,
-        backbone0,
-        tail0,
-        client_loaders,
+        head_initial: nn.Module,
+        backbone_initial: nn.Module,
+        tail_initial: nn.Module,
+        client_loaders: Sequence[DataLoader],
         device: str,
         lr: float,
         momentum: float,
         weight_decay: float,
         local_epochs: int,
-        defense=None,
+        defense: DefenseInterface | None = None,
         poison_schedule: dict[str, float | int] | None = None,
     ) -> None:
         self.device = torch.device(device)
-        self.current_head = copy.deepcopy(head0).to(self.device)
-        self.current_backbone = copy.deepcopy(backbone0).to(self.device)
-        self.current_tail = copy.deepcopy(tail0).to(self.device)
+        self.current_head = copy.deepcopy(head_initial).to(self.device)
+        self.current_backbone = copy.deepcopy(backbone_initial).to(self.device)
+        self.current_tail = copy.deepcopy(tail_initial).to(self.device)
+
         self.client_loaders = client_loaders
         self.lr = lr
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.local_epochs = local_epochs
+
         self.defense = defense
         self.poison_schedule = poison_schedule or {}
         self.history: list[Checkpoint] = []
-        self.last_selected_checkpoint: Checkpoint | None = None
+        self._last_selected_checkpoint: Checkpoint | None = None
         self.defense_decisions: list[dict[str, object]] = []
 
-    def _make_optimizers(self, head, backbone, tail):
-        head_opt = SGD(head.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
-        backbone_opt = SGD(
-            backbone.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay
+    def _make_optimizers(
+        self,
+        head: nn.Module,
+        backbone: nn.Module,
+        tail: nn.Module
+    ) -> tuple[Optimizer, Optimizer, Optimizer]:
+
+        head_opt = SGD(
+            head.parameters(),
+            lr=self.lr,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay
         )
-        tail_opt = SGD(tail.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
+        backbone_opt = SGD(
+            backbone.parameters(),
+            lr=self.lr,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay
+        )
+        tail_opt = SGD(
+            tail.parameters(),
+            lr=self.lr,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay
+        )
         return head_opt, backbone_opt, tail_opt
 
-    def train_one_client(self, client_id: int):
+    def train_one_client(self, client_id: int) -> tuple[nn.Module, nn.Module, nn.Module]:
         head = copy.deepcopy(self.current_head).to(self.device)
         backbone = copy.deepcopy(self.current_backbone).to(self.device)
         tail = copy.deepcopy(self.current_tail).to(self.device)
@@ -86,7 +140,15 @@ class SplitLearningTrainer:
 
         return head, backbone, tail
 
-    def _store_checkpoint(self, step: int, round_id: int, client_id: int, head, backbone, tail) -> Checkpoint:
+    def _store_checkpoint(
+        self,
+        step: int,
+        round_id: int,
+        client_id: int,
+        head: nn.Module,
+        backbone: nn.Module,
+        tail: nn.Module,
+    ) -> Checkpoint:
         previous_backbone = clone_state_dict(self.current_backbone)
         head_state = clone_state_dict(head)
         backbone_state = clone_state_dict(backbone)
@@ -103,22 +165,30 @@ class SplitLearningTrainer:
         self.history.append(checkpoint)
         return checkpoint
 
+    @property
+    def last_selected_checkpoint(self) -> Checkpoint:
+
+        if self._last_selected_checkpoint is None:
+            raise RuntimeError(
+                "No checkpoint has been selected yet."
+            )
+
+        return self._last_selected_checkpoint
+
     def _select_checkpoint(self) -> Checkpoint:
         if self.defense is None:
             return copy.deepcopy(self.history[-1])
         checkpoint = self.defense.select_checkpoint(self.history)
-        decision_getter = getattr(self.defense, "get_latest_decision", None)
-        if callable(decision_getter):
-            decision = decision_getter()
-            if decision is not None:
-                self.defense_decisions.append(dict(decision))
+        decision = self.defense.get_latest_decision()
+        if decision is not None:
+            self.defense_decisions.append(dict(decision))
         return checkpoint
 
     def _load_checkpoint(self, checkpoint: Checkpoint) -> None:
         load_state_dict(self.current_head, checkpoint.head_state, self.device)
         load_state_dict(self.current_backbone, checkpoint.backbone_state, self.device)
         load_state_dict(self.current_tail, checkpoint.tail_state, self.device)
-        self.last_selected_checkpoint = checkpoint
+        self._last_selected_checkpoint = checkpoint
 
     def _apply_poison_schedule(self, round_id: int) -> None:
         if not self.poison_schedule:
@@ -135,13 +205,17 @@ class SplitLearningTrainer:
                 setter(current_pdr)
 
     def _trust_snapshot(self) -> dict[int, float] | None:
-        snapshot_getter = getattr(self.defense, "get_trust_snapshot", None)
-        if callable(snapshot_getter):
-            return snapshot_getter()
+        if self.defense is not None:
+            return self.defense.get_trust_snapshot()
         return None
 
-    def run(self, num_rounds: int, test_loader, trigger_set=None):
-        metrics = []
+    def run(
+        self,
+        num_rounds: int,
+        test_loader: DataLoader,
+        trigger_set: list[tuple[Tensor, int]] | None = None,
+    ) -> list[RoundMetrics]:
+        metrics: list[RoundMetrics] = []
         global_step = 0
         for round_id in range(num_rounds):
             self._apply_poison_schedule(round_id)
@@ -152,21 +226,22 @@ class SplitLearningTrainer:
                 selected = self._select_checkpoint()
                 self._load_checkpoint(selected)
 
-            clean_acc = evaluate_model(self.current_head, self.current_backbone, self.current_tail, test_loader, self.device)
+            clean_acc = evaluate_model(self.current_head, self.current_backbone,
+                                       self.current_tail, test_loader, self.device)
             backdoor_acc = evaluate_backdoor(
                 self.current_head, self.current_backbone, self.current_tail, trigger_set or [], self.device
             )
             metrics.append(
-                {
-                    "round": round_id + 1,
-                    "clean_ma": clean_acc,
-                    "backdoor_ba": backdoor_acc,
-                    "selected_step": None if self.last_selected_checkpoint is None else self.last_selected_checkpoint.step,
-                    "selected_client": None
-                    if self.last_selected_checkpoint is None
-                    else self.last_selected_checkpoint.client_id,
-                    "trust_scores": self._trust_snapshot(),
-                    "defense_decisions": list(self.defense_decisions),
-                }
+                RoundMetrics(
+                    round=round_id + 1,
+                    clean_ma=clean_acc,
+                    backdoor_ba=backdoor_acc,
+                    selected_step=None if self._last_selected_checkpoint is None else self._last_selected_checkpoint.step,
+                    selected_client=None
+                    if self._last_selected_checkpoint is None
+                    else self._last_selected_checkpoint.client_id,
+                    trust_scores=self._trust_snapshot(),
+                    defense_decisions=list(self.defense_decisions),
+                )
             )
         return metrics

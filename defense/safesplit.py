@@ -7,34 +7,9 @@ from dataclasses import dataclass
 import torch
 from scipy.fft import dctn
 
+from defense.common import Checkpoint, flatten_state_dict, state_to_matrix
 
-def clone_state_dict(module) -> dict[str, torch.Tensor]:
-    return {key: value.detach().cpu().clone() for key, value in module.state_dict().items()}
-
-
-def flatten_state_dict(state_dict: dict[str, torch.Tensor]) -> torch.Tensor:
-    parts = []
-    for key in sorted(state_dict):
-        parts.append(state_dict[key].reshape(-1).float())
-    if not parts:
-        return torch.zeros(1, dtype=torch.float32)
-    return torch.cat(parts)
-
-
-def load_state_dict(module, state_dict: dict[str, torch.Tensor], device: torch.device) -> None:
-    module.load_state_dict({k: v.to(device) for k, v in state_dict.items()})
-
-
-def diff_state_dict(new_state: dict[str, torch.Tensor], old_state: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
-    return {key: new_state[key].float() - old_state[key].float() for key in new_state}
-
-
-def state_to_matrix(vector: torch.Tensor, width: int) -> torch.Tensor:
-    width = max(8, width)
-    height = math.ceil(vector.numel() / width)
-    padded = torch.zeros(height * width, dtype=torch.float32)
-    padded[: vector.numel()] = vector.float()
-    return padded.reshape(height, width)
+from .interface import DefenseInterface
 
 
 def dct_low_frequency(update_vector: torch.Tensor, width: int, low_freq_frac: float) -> torch.Tensor:
@@ -62,17 +37,6 @@ def smallest_majority_sum(values: list[float], majority_size: int) -> float:
 
 
 @dataclass
-class Checkpoint:
-    step: int
-    round_id: int
-    client_id: int
-    head_state: dict[str, torch.Tensor]
-    backbone_state: dict[str, torch.Tensor]
-    tail_state: dict[str, torch.Tensor]
-    update_state: dict[str, torch.Tensor]
-
-
-@dataclass
 class SafeSplitAnalysis:
     window: list[Checkpoint]
     frequency_scores: list[float]
@@ -85,7 +49,7 @@ class SafeSplitAnalysis:
     latest_suspiciousness: float
 
 
-class SafeSplitDefense:
+class SafeSplitDefense(DefenseInterface):
     def __init__(self, window_size: int, low_freq_frac: float, matrix_width: int) -> None:
         self.window_size = window_size
         self.low_freq_frac = low_freq_frac
@@ -109,7 +73,7 @@ class SafeSplitDefense:
                 latest_suspiciousness=0.0,
             )
 
-        window = history[-self.window_size :]
+        window = history[-self.window_size:]
         majority_size = self.window_size // 2 + 1
 
         freq_signatures = [

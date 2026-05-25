@@ -65,7 +65,13 @@ SafeSplit_Distributed_DL/
 ## Execution
 
 ```bash
-pip install -r requirements.txt
+# one-time: create Python 3.10 base env containing uv
+conda create -y -n safesplit-uv310 python=3.10
+conda run -n safesplit-uv310 python -m pip install uv
+
+# from repository root
+UV_CACHE_DIR=.uv-cache conda run -n safesplit-uv310 uv sync --python 3.10
+source .venv/bin/activate
 ```
 
 After installing dependencies, the recommended path is to open `SafeSplit_walkthrough.ipynb`, set `NOTEBOOK_EXPERIMENT_PRESET = "paper"`, restart the kernel, and run all cells. The notebook selects a reporting seed for the paper-style comparison suite and prints a sanity check before the extension section.
